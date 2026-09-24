@@ -7,7 +7,7 @@ const anon = createClient(url, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, { auth
 const admin = createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 
 let ok = true;
-for (const table of ["rooms", "messages"]) {
+for (const table of ["rooms", "messages", "events"]) {
   const a = await anon.from(table).select("*").limit(1);
   const anonBlocked = a.error?.code === "42501"; // permission denied
   console.log(`${anonBlocked ? "✓" : "✗"} anon → ${table}: ${anonBlocked ? `거부됨 (${a.error.message})` : a.error ? a.error.message : "접근 가능! 권한 설정 확인 필요"}`);

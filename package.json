@@ -10,7 +10,8 @@
     "check:supabase": "node --env-file=.env.local scripts/check-supabase.mjs",
     "check:rls": "node --env-file=.env.local scripts/check-rls.mjs",
     "check:seo": "node scripts/check-seo.mjs",
-    "seed:demo": "node --env-file=.env.local scripts/seed-demo.mjs"
+    "seed:demo": "node --env-file=.env.local scripts/seed-demo.mjs",
+    "stats:pdf": "node --env-file=.env.local scripts/stats-pdf.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.1",

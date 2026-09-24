@@ -83,7 +83,7 @@
 | 카톡 공유 | Kakao JavaScript SDK | |
 | 결제 | 토스페이먼츠 | Phase 3 |
 | PDF 생성 | Puppeteer/Playwright 기반 별도 워커 서버 (Railway, Fly.io 등) | Phase 3, Vercel 서버리스에서 돌리지 않음 |
-| 분석 | PostHog 또는 GA4 | PDF 버튼 수요 측정 |
+| 분석 | 자체 `events` 테이블 (`npm run stats:pdf`) | PDF 버튼 수요 측정. 외부 분석 도구(GA4, PostHog 등)는 페이지 URL(방 ID·결과 ID·주최자 토큰)을 외부로 보내므로 쓰지 않는다. 도입 시 URL에서 ID·토큰을 제거하고 보낼 것 |
 
 **환경 변수** (`.env.local`, 절대 커밋하지 않음)
 - `NEXT_PUBLIC_SUPABASE_URL`
@@ -103,6 +103,8 @@ rooms
   deadline        timestamptz
   password_hash   text  nullable
   host_token_hash text  (주최자 대시보드 접근용 비밀 토큰의 해시. 원본은 주최자 링크에만)
+  result_id       text  unique (받는 사람용 결과 링크 /v/<result_id>. 공유 링크와 분리)
+  template        text  (결과 페이지 템플릿: paper | pastel)
   created_at      timestamptz
 
 participants          -- Phase 2
@@ -119,7 +121,17 @@ messages
   content         text
   photo_path      text  nullable (비공개 버킷 내 경로)
   created_at      timestamptz
+
+events                -- 수요 검증용 (IP·기기·URL은 저장하지 않음)
+  id              uuid  PK
+  name            text  (pdf_interest)
+  source          text  (result | host)
+  room_id         text  nullable FK → rooms.id (방 삭제 시 null)
+  created_at      timestamptz
 ```
+
+**URL 구조**: `/r/<id>` 작성(공유 링크) · `/v/<result_id>` 결과(받는 사람용) · `/host/<token>` 주최자 관리
+**마이그레이션**: `supabase/migrations/`의 SQL을 번호 순서대로 SQL Editor에서 한 번씩 실행
 
 **참여자 추적 방식 (Phase 2)**: 주최자가 이름 명단을 입력 → 참여자는 공용 링크로 들어와 자기 이름을 선택 후 작성. 개인별 링크 발급 방식은 채택하지 않음 (공유가 번거로움).
 

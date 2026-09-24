@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { CopyButton } from "@/components/CopyButton";
 import { KakaoShareButton } from "@/components/KakaoShareButton";
+import { PdfInterestButton } from "@/components/PdfInterestButton";
 import { SearchSafeNotice } from "@/components/SearchSafeNotice";
 import { card } from "@/components/ui";
 import { formatDeadline } from "@/lib/format";
@@ -98,6 +99,10 @@ export default async function HostPage(props: PageProps<"/host/[token]">) {
 
           <h3 className="mt-6 text-sm font-semibold">결과 페이지 디자인</h3>
           <TemplatePicker token={token} current={isTemplateId(room.template) ? room.template : "paper"} />
+
+          <div className="mt-6 border-t border-line pt-5">
+            <PdfInterestButton source="host" recordKey={token} />
+          </div>
         </section>
 
         <section className="mt-4 rounded-2xl bg-pastel-yellow/70 p-5">

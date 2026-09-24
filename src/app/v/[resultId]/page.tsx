@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { PdfInterestButton } from "@/components/PdfInterestButton";
 import { SearchSafeNotice } from "@/components/SearchSafeNotice";
 import { ogMetadata } from "@/lib/og";
 import { signPhotoUrls } from "@/lib/photos";
@@ -52,6 +53,12 @@ export default async function ResultPage(props: PageProps<"/v/[resultId]">) {
                 cardClass={template.card}
               />
             ))}
+          </div>
+        )}
+
+        {messages.length > 0 && (
+          <div className="mt-14">
+            <PdfInterestButton source="result" recordKey={room.result_id} />
           </div>
         )}
 
