@@ -1,0 +1,152 @@
+"use client";
+
+import imageCompression from "browser-image-compression";
+import { useActionState, useEffect, useState } from "react";
+import { buttonPrimary, errorBox, hint, input, label } from "@/components/ui";
+import { AUTHOR_MAX_LENGTH, MESSAGE_MAX_LENGTH, PHOTO_MAX_BYTES } from "@/lib/limits";
+import { submitMessage, type SubmitState } from "./actions";
+
+// 업로드 전 브라우저에서 압축: 저장·트래픽 비용 절감 + 서버 요청 크기 제한 준수
+const COMPRESSION = {
+  maxSizeMB: 1,
+  maxWidthOrHeight: 1920,
+  fileType: "image/jpeg",
+  initialQuality: 0.85,
+  useWebWorker: true,
+};
+
+type Photo = { file: File; previewUrl: string };
+
+export function WriteForm({ roomId, recipientName }: { roomId: string; recipientName: string }) {
+  const [state, formAction, pending] = useActionState<SubmitState, FormData>(submitMessage.bind(null, roomId), {});
+  const [content, setContent] = useState("");
+  const [photo, setPhoto] = useState<Photo | null>(null);
+  const [photoStatus, setPhotoStatus] = useState<"idle" | "compressing" | "error">("idle");
+
+  // 서버 검증 실패로 되돌아왔을 때 입력했던 내용을 복원 (액션 후 폼이 자동 리셋되므로)
+  const [restoredFrom, setRestoredFrom] = useState(state.values);
+  if (state.values !== restoredFrom) {
+    setRestoredFrom(state.values);
+    if (state.values) setContent(state.values.content);
+  }
+
+  // 미리보기 URL 정리
+  useEffect(() => () => {
+    if (photo) URL.revokeObjectURL(photo.previewUrl);
+  }, [photo]);
+
+  async function onPhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const original = e.target.files?.[0];
+    e.target.value = ""; // 같은 파일을 다시 골라도 change 이벤트가 나도록
+    if (!original) return;
+
+    setPhotoStatus("compressing");
+    try {
+      const compressed = await imageCompression(original, COMPRESSION);
+      if (compressed.size > PHOTO_MAX_BYTES) throw new Error("too large");
+      const file = new File([compressed], "photo.jpg", { type: "image/jpeg" });
+      setPhoto({ file, previewUrl: URL.createObjectURL(file) });
+      setPhotoStatus("idle");
+    } catch {
+      setPhoto(null);
+      setPhotoStatus("error");
+    }
+  }
+
+  // 원본 파일 input에는 name이 없으므로, 압축된 파일만 FormData에 실어 보낸다
+  function submit(formData: FormData) {
+    if (photo) formData.set("photo", photo.file);
+    formAction(formData);
+  }
+
+  if (state.done) {
+    return (
+      <div className="rounded-2xl bg-paper px-6 py-12 text-center">
+        <p className="text-4xl text-rose">♡</p>
+        <p className="mt-4 font-hand text-3xl font-bold">메시지를 남겼어요!</p>
+        <p className="mt-3 text-sm text-ink-muted">{recipientName}님에게 소중하게 전달될 거예요.</p>
+      </div>
+    );
+  }
+
+  return (
+    <form action={submit} className="flex flex-col gap-5">
+      <label className="flex flex-col gap-2">
+        <span className={label}>메시지</span>
+        <textarea
+          name="content"
+          required
+          rows={8}
+          maxLength={MESSAGE_MAX_LENGTH}
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="여기에 메시지를 적어주세요..."
+          className={`${input} resize-none leading-relaxed`}
+        />
+        <span className={`${hint} self-end`}>
+          {content.length}/{MESSAGE_MAX_LENGTH}
+        </span>
+      </label>
+
+      <div className="flex flex-col gap-2">
+        <span className={label}>
+          사진 <span className="font-normal text-ink-muted">(선택, 1장)</span>
+        </span>
+        {photo ? (
+          <div className="relative">
+            {/* eslint-disable-next-line @next/next/no-img-element -- 로컬 blob 미리보기 */}
+            <img src={photo.previewUrl} alt="첨부한 사진 미리보기" className="w-full rounded-lg object-cover" />
+            <button
+              type="button"
+              onClick={() => setPhoto(null)}
+              className="absolute top-2 right-2 rounded-full bg-ink/70 px-3 py-1 text-sm text-white"
+            >
+              삭제
+            </button>
+          </div>
+        ) : (
+          <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-line bg-white py-10 text-center">
+            <span className="text-3xl" aria-hidden>
+              🖼️
+            </span>
+            <span className="text-sm text-ink-muted">
+              {photoStatus === "compressing" ? "사진 준비 중…" : "사진을 첨부해주세요"}
+            </span>
+            <input type="file" accept="image/*" onChange={onPhotoChange} className="sr-only" />
+          </label>
+        )}
+        {photoStatus === "error" && (
+          <p role="alert" className={errorBox}>
+            사진을 불러오지 못했어요. 다른 사진을 골라주세요.
+          </p>
+        )}
+      </div>
+
+      <label className="flex flex-col gap-2">
+        <span className={label}>보내는 사람</span>
+        <input
+          name="authorName"
+          required
+          maxLength={AUTHOR_MAX_LENGTH}
+          placeholder="이름 또는 닉네임"
+          defaultValue={state.values?.authorName}
+          className={input}
+        />
+      </label>
+
+      {state.error && (
+        <p role="alert" className={errorBox}>
+          {state.error}
+        </p>
+      )}
+
+      <button
+        type="submit"
+        disabled={pending || photoStatus === "compressing"}
+        className={`${buttonPrimary} mt-2 w-full`}
+      >
+        {pending ? "보내는 중…" : "작성 완료"}
+      </button>
+    </form>
+  );
+}

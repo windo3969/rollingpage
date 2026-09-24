@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { buttonSmall } from "./ui";
 
 export function CopyButton({ text, label = "복사" }: { text: string; label?: string }) {
   const [copied, setCopied] = useState(false);
@@ -16,11 +17,7 @@ export function CopyButton({ text, label = "복사" }: { text: string; label?: s
   }
 
   return (
-    <button
-      type="button"
-      onClick={copy}
-      className="shrink-0 rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white active:bg-zinc-700"
-    >
+    <button type="button" onClick={copy} className={buttonSmall}>
       {copied ? "복사됨" : label}
     </button>
   );

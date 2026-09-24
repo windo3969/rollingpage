@@ -17,4 +17,37 @@ for (const table of ["rooms", "messages"]) {
 
   ok &&= anonBlocked && !s.error;
 }
+
+// ─── Storage: photos 버킷 ───────────────────────────
+const report = (pass, msg) => {
+  console.log(`${pass ? "✓" : "✗"} ${msg}`);
+  ok &&= pass;
+};
+
+const bucket = await admin.storage.getBucket("photos");
+report(!bucket.error, `photos 버킷 존재: ${bucket.error ? bucket.error.message : "있음"}`);
+if (!bucket.error) {
+  report(bucket.data.public === false, `photos 버킷 비공개: public = ${bucket.data.public}`);
+
+  // 테스트 파일을 service role로 올려두고 anon으로 접근해본다
+  const path = `_check-rls/${Date.now()}.jpg`;
+  const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 0x10]);
+  const up = await admin.storage.from("photos").upload(path, jpeg, { contentType: "image/jpeg" });
+  report(!up.error, `service role → 업로드: ${up.error ? up.error.message : "가능"}`);
+
+  const anonList = await anon.storage.from("photos").list("_check-rls");
+  report(anonList.error || anonList.data.length === 0, "anon → 목록 조회: 거부됨");
+
+  const anonDownload = await anon.storage.from("photos").download(path);
+  report(Boolean(anonDownload.error), "anon → 다운로드: 거부됨");
+
+  const publicRes = await fetch(anon.storage.from("photos").getPublicUrl(path).data.publicUrl);
+  report(!publicRes.ok, `공개 URL 접근: 거부됨 (HTTP ${publicRes.status})`);
+
+  const anonUpload = await anon.storage.from("photos").upload(`_check-rls/anon-${Date.now()}.jpg`, jpeg, { contentType: "image/jpeg" });
+  report(Boolean(anonUpload.error), "anon → 업로드: 거부됨");
+
+  await admin.storage.from("photos").remove([path]);
+}
+
 process.exit(ok ? 0 : 1);

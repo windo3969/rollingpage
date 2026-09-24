@@ -2,6 +2,12 @@ import type { NextConfig } from "next";
 import { X_ROBOTS_TAG } from "./src/lib/seo";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {
+      // 메시지 + 압축된 사진(최대 2MB, lib/limits.ts) + multipart 오버헤드
+      bodySizeLimit: "3mb",
+    },
+  },
   async headers() {
     return [
       {
