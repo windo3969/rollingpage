@@ -3,7 +3,7 @@
 const base = (process.argv[2] ?? "http://localhost:3000").replace(/\/$/, "");
 
 // 차단되어야 하는 경로 예시 (존재하지 않는 경로여도 404 페이지까지 차단되어야 한다)
-const PRIVATE_PATHS = ["/new", "/host/checkseo0000000000000000000000000", "/r/checkseo0000000000", "/r/checkseo0000000000/write", "/host/checkseo", "/api/checkseo"];
+const PRIVATE_PATHS = ["/new", "/v/0123456789abcdef0123456789abcdef", "/host/checkseo0000000000000000000000000", "/r/checkseo0000000000", "/r/checkseo0000000000/write", "/host/checkseo", "/api/checkseo"];
 
 let ok = true;
 const report = (pass, msg) => {

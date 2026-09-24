@@ -6,8 +6,9 @@ import { CopyButton } from "@/components/CopyButton";
 import { SearchSafeNotice } from "@/components/SearchSafeNotice";
 import { card } from "@/components/ui";
 import { formatDeadline } from "@/lib/format";
-import { hashToken } from "@/lib/hash";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { countMessages, getRoomByHostToken } from "@/lib/rooms";
+import { isTemplateId } from "@/lib/templates";
+import { TemplatePicker } from "./TemplatePicker";
 
 export const metadata: Metadata = {
   title: "주최자 페이지",
@@ -26,17 +27,13 @@ const linkField = "min-w-0 flex-1 rounded-lg border border-line bg-cream px-3 py
 
 export default async function HostPage(props: PageProps<"/host/[token]">) {
   const { token } = await props.params;
-
-  const { data: room } = await createAdminClient()
-    .from("rooms")
-    .select("id, title, recipient_name, deadline, password_hash")
-    .eq("host_token_hash", hashToken(token))
-    .maybeSingle();
-
+  const room = await getRoomByHostToken(token);
   if (!room) notFound();
 
+  const messageCount = await countMessages(room.id);
   const base = await origin();
   const shareUrl = `${base}/r/${room.id}`;
+  const resultUrl = `${base}/v/${room.result_id}`;
   const hostUrl = `${base}/host/${token}`;
 
   return (
@@ -49,14 +46,40 @@ export default async function HostPage(props: PageProps<"/host/[token]">) {
           작성 마감: {formatDeadline(room.deadline)}
           {room.password_hash && " · 비밀번호 설정됨"}
         </p>
+        <p className="mt-4 inline-block rounded-full bg-pastel-mint px-3 py-1 text-sm font-medium">
+          지금까지 {messageCount}개의 메시지가 모였어요
+        </p>
 
-        <section className={`${card} mt-8`}>
-          <h2 className="font-semibold">친구들에게 공유할 링크</h2>
+        <section className={`${card} mt-6`}>
+          <h2 className="font-semibold">① 친구들에게 공유할 링크</h2>
           <p className="mt-1 text-sm text-ink-muted">이 링크로 들어온 사람은 메시지를 쓸 수 있어요.</p>
           <div className="mt-3 flex items-center gap-2">
             <input readOnly value={shareUrl} className={linkField} />
             <CopyButton text={shareUrl} />
           </div>
+        </section>
+
+        <section className={`${card} mt-4`}>
+          <h2 className="font-semibold">② {room.recipient_name}님에게 보낼 결과 링크</h2>
+          <p className="mt-1 text-sm text-ink-muted">
+            모인 메시지를 한 장으로 볼 수 있는 링크예요. 생일에 {room.recipient_name}님에게 보내주세요.
+            작성자들은 이 링크를 모르기 때문에 결과물을 미리 볼 수 없어요.
+          </p>
+          <div className="mt-3 flex items-center gap-2">
+            <input readOnly value={resultUrl} className={linkField} />
+            <CopyButton text={resultUrl} />
+          </div>
+          <a
+            href={resultUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-block text-sm font-medium text-rose underline underline-offset-4"
+          >
+            결과물 미리보기 →
+          </a>
+
+          <h3 className="mt-6 text-sm font-semibold">결과 페이지 디자인</h3>
+          <TemplatePicker token={token} current={isTemplateId(room.template) ? room.template : "paper"} />
         </section>
 
         <section className="mt-4 rounded-2xl bg-pastel-yellow/70 p-5">

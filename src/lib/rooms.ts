@@ -9,19 +9,59 @@ export type Room = {
   recipient_name: string;
   deadline: string;
   password_hash: string | null;
+  result_id: string;
+  template: string;
 };
 
-const ROOM_ID_PATTERN = /^[A-Za-z0-9_-]{16,64}$/;
+export type Message = {
+  id: string;
+  author_name: string;
+  content: string;
+  photo_path: string | null;
+  created_at: string;
+};
 
-export async function getRoom(id: string): Promise<Room | null> {
-  // 형식이 맞지 않는 ID는 DB까지 가지 않는다
-  if (!ROOM_ID_PATTERN.test(id)) return null;
-  const { data } = await createAdminClient()
-    .from("rooms")
-    .select("id, title, recipient_name, deadline, password_hash")
-    .eq("id", id)
-    .maybeSingle();
+const ROOM_COLUMNS = "id, title, recipient_name, deadline, password_hash, result_id, template";
+
+// 형식이 맞지 않는 ID·토큰은 DB까지 가지 않는다
+const ROOM_ID_PATTERN = /^[A-Za-z0-9_-]{16,64}$/;
+const RESULT_ID_PATTERN = /^[a-f0-9]{32}$/;
+const HOST_TOKEN_PATTERN = /^[A-Za-z0-9_-]{32}$/;
+
+async function findRoom(column: "id" | "result_id" | "host_token_hash", value: string): Promise<Room | null> {
+  const { data } = await createAdminClient().from("rooms").select(ROOM_COLUMNS).eq(column, value).maybeSingle();
   return data;
+}
+
+export async function getRoom(id: string) {
+  return ROOM_ID_PATTERN.test(id) ? findRoom("id", id) : null;
+}
+
+export async function getRoomByResultId(resultId: string) {
+  return RESULT_ID_PATTERN.test(resultId) ? findRoom("result_id", resultId) : null;
+}
+
+export async function getRoomByHostToken(token: string) {
+  return HOST_TOKEN_PATTERN.test(token) ? findRoom("host_token_hash", hashToken(token)) : null;
+}
+
+export async function getMessages(roomId: string): Promise<Message[]> {
+  const { data, error } = await createAdminClient()
+    .from("messages")
+    .select("id, author_name, content, photo_path, created_at")
+    .eq("room_id", roomId)
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return data;
+}
+
+export async function countMessages(roomId: string): Promise<number> {
+  const { count, error } = await createAdminClient()
+    .from("messages")
+    .select("id", { count: "exact", head: true })
+    .eq("room_id", roomId);
+  if (error) throw error;
+  return count ?? 0;
 }
 
 export const isClosed = (room: Room) => new Date(room.deadline).getTime() < Date.now();
