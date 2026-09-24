@@ -1,16 +1,22 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SearchSafeNotice } from "@/components/SearchSafeNotice";
+import { ogMetadata } from "@/lib/og";
 import { signPhotoUrls } from "@/lib/photos";
 import { getMessages, getRoomByResultId } from "@/lib/rooms";
 import { isTemplateId, TEMPLATES } from "@/lib/templates";
 import { MessageCard } from "./MessageCard";
 
-export const metadata: Metadata = {
-  title: "롤링페이퍼",
+export async function generateMetadata(props: PageProps<"/v/[resultId]">): Promise<Metadata> {
   // URL에 결과 ID가 들어 있고, 사진 signed URL도 있으므로 Referer를 싣지 않는다.
-  referrer: "no-referrer",
-};
+  const referrer = "no-referrer";
+  const room = await getRoomByResultId((await props.params).resultId);
+  if (!room) return { title: "롤링페이퍼", referrer };
+  return {
+    ...ogMetadata(`${room.recipient_name}님에게 롤링페이퍼가 도착했어요 ♡`, "친구들이 마음을 모아 만든 롤링페이퍼예요"),
+    referrer,
+  };
+}
 
 export default async function ResultPage(props: PageProps<"/v/[resultId]">) {
   const { resultId } = await props.params;

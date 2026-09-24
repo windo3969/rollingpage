@@ -1,5 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
+import { cache } from "react";
 import { hashToken, safeEqual } from "./hash";
 import { createAdminClient } from "./supabase/admin";
 
@@ -28,10 +29,13 @@ const ROOM_ID_PATTERN = /^[A-Za-z0-9_-]{16,64}$/;
 const RESULT_ID_PATTERN = /^[a-f0-9]{32}$/;
 const HOST_TOKEN_PATTERN = /^[A-Za-z0-9_-]{32}$/;
 
-async function findRoom(column: "id" | "result_id" | "host_token_hash", value: string): Promise<Room | null> {
-  const { data } = await createAdminClient().from("rooms").select(ROOM_COLUMNS).eq(column, value).maybeSingle();
-  return data;
-}
+// cache: 같은 요청 안에서 generateMetadata와 page가 같은 방을 조회해도 DB는 한 번만 간다
+const findRoom = cache(
+  async (column: "id" | "result_id" | "host_token_hash", value: string): Promise<Room | null> => {
+    const { data } = await createAdminClient().from("rooms").select(ROOM_COLUMNS).eq(column, value).maybeSingle();
+    return data;
+  },
+);
 
 export async function getRoom(id: string) {
   return ROOM_ID_PATTERN.test(id) ? findRoom("id", id) : null;

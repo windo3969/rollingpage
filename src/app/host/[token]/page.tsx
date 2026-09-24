@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { CopyButton } from "@/components/CopyButton";
+import { KakaoShareButton } from "@/components/KakaoShareButton";
 import { SearchSafeNotice } from "@/components/SearchSafeNotice";
 import { card } from "@/components/ui";
 import { formatDeadline } from "@/lib/format";
@@ -57,6 +58,14 @@ export default async function HostPage(props: PageProps<"/host/[token]">) {
             <input readOnly value={shareUrl} className={linkField} />
             <CopyButton text={shareUrl} />
           </div>
+          <div className="mt-3">
+            <KakaoShareButton
+              url={shareUrl}
+              title={`${room.recipient_name}님에게 롤링페이퍼를 남겨주세요 ♡`}
+              description={`${formatDeadline(room.deadline)}까지 작성할 수 있어요`}
+              buttonTitle="메시지 쓰러 가기"
+            />
+          </div>
         </section>
 
         <section className={`${card} mt-4`}>
@@ -68,6 +77,15 @@ export default async function HostPage(props: PageProps<"/host/[token]">) {
           <div className="mt-3 flex items-center gap-2">
             <input readOnly value={resultUrl} className={linkField} />
             <CopyButton text={resultUrl} />
+          </div>
+          <div className="mt-3">
+            <KakaoShareButton
+              url={resultUrl}
+              title={`${room.recipient_name}님에게 롤링페이퍼가 도착했어요 ♡`}
+              description={`${messageCount}개의 마음이 모였어요`}
+              buttonTitle="롤링페이퍼 열어보기"
+              label={`카카오톡으로 ${room.recipient_name}님에게 보내기`}
+            />
           </div>
           <a
             href={resultUrl}

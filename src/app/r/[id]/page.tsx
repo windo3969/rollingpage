@@ -3,13 +3,19 @@ import { notFound } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { SearchSafeNotice } from "@/components/SearchSafeNotice";
 import { formatDeadline } from "@/lib/format";
+import { ogMetadata } from "@/lib/og";
 import { getRoom, hasRoomAccess, isClosed } from "@/lib/rooms";
 import { PasswordGate } from "./PasswordGate";
 import { WriteForm } from "./WriteForm";
 
-export const metadata: Metadata = {
-  title: "롤링페이퍼 작성",
-};
+export async function generateMetadata(props: PageProps<"/r/[id]">): Promise<Metadata> {
+  const room = await getRoom((await props.params).id);
+  if (!room) return { title: "롤링페이퍼" };
+  return ogMetadata(
+    `${room.recipient_name}님에게 롤링페이퍼를 남겨주세요 ♡`,
+    `${formatDeadline(room.deadline)}까지 작성할 수 있어요`,
+  );
+}
 
 export default async function WritePage(props: PageProps<"/r/[id]">) {
   const { id } = await props.params;
