@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { hashPassword, hashToken } from "@/lib/hash";
 import { newHostToken, newRoomId } from "@/lib/ids";
+import { checkRateLimit, RATE_LIMIT_MESSAGE } from "@/lib/rateLimit";
 
 export type CreateRoomState = {
   error?: string;
@@ -33,6 +34,8 @@ export async function createRoom(_prev: CreateRoomState, formData: FormData): Pr
   if (Number.isNaN(deadlineAt) || deadlineAt < now) return { error: "마감일은 오늘 이후로 선택해주세요.", values };
   if (deadlineAt > now + MAX_DEADLINE_DAYS * DAY_MS)
     return { error: `마감일은 ${MAX_DEADLINE_DAYS}일 이내로 선택해주세요.`, values };
+
+  if (!(await checkRateLimit("createRoom"))) return { error: RATE_LIMIT_MESSAGE, values };
 
   const hostToken = newHostToken();
   const { error } = await createAdminClient()

@@ -7,7 +7,7 @@ const anon = createClient(url, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, { auth
 const admin = createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 
 let ok = true;
-for (const table of ["rooms", "messages", "events"]) {
+for (const table of ["rooms", "messages", "events", "rate_limits"]) {
   const a = await anon.from(table).select("*").limit(1);
   const anonBlocked = a.error?.code === "42501"; // permission denied
   console.log(`${anonBlocked ? "✓" : "✗"} anon → ${table}: ${anonBlocked ? `거부됨 (${a.error.message})` : a.error ? a.error.message : "접근 가능! 권한 설정 확인 필요"}`);
@@ -18,11 +18,30 @@ for (const table of ["rooms", "messages", "events"]) {
   ok &&= anonBlocked && !s.error;
 }
 
-// ─── Storage: photos 버킷 ───────────────────────────
 const report = (pass, msg) => {
   console.log(`${pass ? "✓" : "✗"} ${msg}`);
   ok &&= pass;
 };
+
+// ─── 요청 횟수 제한 함수 ─────────────────────────────
+{
+  const args = { p_key: `_check-rls:${Date.now()}`, p_limit: 3, p_window_seconds: 60 };
+  const anonCall = await anon.rpc("check_rate_limit", args);
+  report(
+    anonCall.error?.code === "42501", // permission denied
+    `anon → check_rate_limit 실행: ${anonCall.error ? anonCall.error.message : "실행 가능! 권한 설정 확인 필요"}`,
+  );
+
+  const results = [];
+  for (let i = 0; i < 4; i++) results.push((await admin.rpc("check_rate_limit", args)).data);
+  report(
+    JSON.stringify(results) === "[true,true,true,false]",
+    `service role → 제한 3회: 4번째 차단 (${JSON.stringify(results)})`,
+  );
+  await admin.from("rate_limits").delete().like("key", "_check-rls:%");
+}
+
+// ─── Storage: photos 버킷 ───────────────────────────
 
 const bucket = await admin.storage.getBucket("photos");
 report(!bucket.error, `photos 버킷 존재: ${bucket.error ? bucket.error.message : "있음"}`);

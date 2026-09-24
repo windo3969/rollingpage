@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { verifyPassword } from "@/lib/hash";
 import { MESSAGE_MAX_LENGTH, AUTHOR_MAX_LENGTH, PHOTO_MAX_BYTES } from "@/lib/limits";
+import { checkRateLimit, RATE_LIMIT_MESSAGE } from "@/lib/rateLimit";
 import { getRoom, grantRoomAccess, hasRoomAccess, isClosed } from "@/lib/rooms";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -14,6 +15,11 @@ export type UnlockState = { error?: string };
 export async function unlockRoom(roomId: string, _prev: UnlockState, formData: FormData): Promise<UnlockState> {
   const room = await getRoom(roomId);
   if (!room?.password_hash) return { error: "롤링페이퍼를 찾을 수 없어요." };
+
+  // 비밀번호 대입 방지: IP별 + 방 전체 두 가지로 제한
+  const allowed =
+    (await checkRateLimit("unlockPerIp", room.id)) && (await checkRateLimit("unlockPerRoom", room.id, { perIp: false }));
+  if (!allowed) return { error: "비밀번호를 너무 많이 시도했어요. 15분 뒤에 다시 시도해주세요." };
 
   const password = String(formData.get("password") ?? "");
   if (!(await verifyPassword(password, room.password_hash))) return { error: "비밀번호가 맞지 않아요." };
@@ -57,6 +63,8 @@ export async function submitMessage(roomId: string, _prev: SubmitState, formData
     return { error: `메시지는 1~${MESSAGE_MAX_LENGTH}자로 작성해주세요.`, values };
   if (authorName.length < 1 || authorName.length > AUTHOR_MAX_LENGTH)
     return { error: `이름은 1~${AUTHOR_MAX_LENGTH}자로 입력해주세요.`, values };
+
+  if (!(await checkRateLimit("submitMessage", room.id))) return { error: RATE_LIMIT_MESSAGE, values };
 
   const supabase = createAdminClient();
   let photoPath: string | null = null;
