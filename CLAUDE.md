@@ -102,7 +102,7 @@ rooms
   recipient_name  text
   deadline        timestamptz
   password_hash   text  nullable
-  host_token      text  (주최자 대시보드 접근용 비밀 토큰)
+  host_token_hash text  (주최자 대시보드 접근용 비밀 토큰의 해시. 원본은 주최자 링크에만)
   created_at      timestamptz
 
 participants          -- Phase 2

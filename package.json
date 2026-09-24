@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "check:supabase": "node --env-file=.env.local scripts/check-supabase.mjs"
+    "check:supabase": "node --env-file=.env.local scripts/check-supabase.mjs",
+    "check:rls": "node --env-file=.env.local scripts/check-rls.mjs",
+    "check:seo": "node scripts/check-seo.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.1",
