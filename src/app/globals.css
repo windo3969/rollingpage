@@ -12,11 +12,9 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* 다크 모드는 디자인 단계에서 따로 다룬다. 그 전까지는 라이트 고정 (입력창 글자가 안 보이는 문제 방지) */
+:root {
+  color-scheme: light;
 }
 
 body {
