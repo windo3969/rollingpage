@@ -7,15 +7,26 @@ const anon = createClient(url, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, { auth
 const admin = createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 
 let ok = true;
-for (const table of ["rooms", "messages", "events", "rate_limits"]) {
+// serviceRole: 서버가 테이블에 직접 접근해야 하는지.
+// rate_limits는 check_rate_limit 함수(security definer)로만 다루므로 직접 접근 권한이 없는 것이 정상이다.
+const TABLES = [
+  { name: "rooms", serviceRole: true },
+  { name: "messages", serviceRole: true },
+  { name: "events", serviceRole: true },
+  { name: "rate_limits", serviceRole: false },
+];
+for (const { name: table, serviceRole } of TABLES) {
   const a = await anon.from(table).select("*").limit(1);
   const anonBlocked = a.error?.code === "42501"; // permission denied
   console.log(`${anonBlocked ? "✓" : "✗"} anon → ${table}: ${anonBlocked ? `거부됨 (${a.error.message})` : a.error ? a.error.message : "접근 가능! 권한 설정 확인 필요"}`);
 
   const s = await admin.from(table).select("*").limit(1);
-  console.log(`${s.error ? "✗" : "✓"} service role → ${table}: ${s.error ? s.error.message : "접근 가능"}`);
+  const serviceOk = serviceRole ? !s.error : s.error?.code === "42501";
+  console.log(
+    `${serviceOk ? "✓" : "✗"} service role → ${table}: ${serviceRole ? (s.error ? s.error.message : "접근 가능") : s.error ? "직접 접근 없음 (함수로만 사용)" : "직접 접근 가능! 권한 설정 확인 필요"}`,
+  );
 
-  ok &&= anonBlocked && !s.error;
+  ok &&= anonBlocked && serviceOk;
 }
 
 const report = (pass, msg) => {
@@ -25,6 +36,7 @@ const report = (pass, msg) => {
 
 // ─── 요청 횟수 제한 함수 ─────────────────────────────
 {
+  // 테스트 행은 직접 지울 수 없으므로(위 참고) 함수의 자동 정리(2일)에 맡긴다
   const args = { p_key: `_check-rls:${Date.now()}`, p_limit: 3, p_window_seconds: 60 };
   const anonCall = await anon.rpc("check_rate_limit", args);
   report(
@@ -38,7 +50,6 @@ const report = (pass, msg) => {
     JSON.stringify(results) === "[true,true,true,false]",
     `service role → 제한 3회: 4번째 차단 (${JSON.stringify(results)})`,
   );
-  await admin.from("rate_limits").delete().like("key", "_check-rls:%");
 }
 
 // ─── Storage: photos 버킷 ───────────────────────────
