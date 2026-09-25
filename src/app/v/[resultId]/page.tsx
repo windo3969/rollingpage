@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { HeartIcon } from "@/components/icons";
+import { MessageCard } from "@/components/MessageCard";
 import { PdfInterestButton } from "@/components/PdfInterestButton";
 import { SearchSafeNotice } from "@/components/SearchSafeNotice";
 import { ogMetadata } from "@/lib/og";
 import { signPhotoUrls } from "@/lib/photos";
 import { getMessages, getRoomByResultId } from "@/lib/rooms";
 import { isTemplateId, TEMPLATES } from "@/lib/templates";
-import { MessageCard } from "./MessageCard";
 
 export async function generateMetadata(props: PageProps<"/v/[resultId]">): Promise<Metadata> {
   // URL에 결과 ID가 들어 있고, 사진 signed URL도 있으므로 Referer를 싣지 않는다.

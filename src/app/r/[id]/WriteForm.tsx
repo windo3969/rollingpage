@@ -2,8 +2,9 @@
 
 import imageCompression from "browser-image-compression";
 import { useActionState, useEffect, useState } from "react";
-import { HeartIcon, ImageIcon } from "@/components/icons";
-import { buttonPrimary, errorBox, hint, input, label } from "@/components/ui";
+import { HeartIcon, ImageIcon, LockIcon } from "@/components/icons";
+import { MessageCard } from "@/components/MessageCard";
+import { buttonPrimary, buttonSecondary, errorBox, hint, input, label } from "@/components/ui";
 import { MESSAGE_MAX_LENGTH, PHOTO_MAX_BYTES } from "@/lib/limits";
 import type { Participant } from "@/lib/rooms";
 import { submitMessage, type SubmitState } from "./actions";
@@ -25,12 +26,15 @@ export function WriteForm({
   roomId,
   recipientName,
   participants,
+  preview,
 }: {
   roomId: string;
   recipientName: string;
   participants: Participant[];
+  preview: { pageClass: string; cardClass: string }; // 결과 페이지 템플릿 색 (내 메시지 미리보기용)
 }) {
   const [state, formAction, pending] = useActionState<SubmitState, FormData>(submitMessage.bind(null, roomId), {});
+  const [dismissedId, setDismissedId] = useState<string | null>(null); // "하나 더 쓰기"로 닫은 완료 화면
   const [content, setContent] = useState("");
   const [author, setAuthor] = useState<string | null>(null); // 명단에서 고른 참여자 ID, 또는 NOT_LISTED
   const [photo, setPhoto] = useState<Photo | null>(null);
@@ -75,12 +79,42 @@ export function WriteForm({
     formAction(formData);
   }
 
-  if (state.done) {
+  // 작성 완료 화면: 결과 페이지와 같은 카드로 "내 메시지"만 미리 보여준다 (다른 사람 메시지는 보여주지 않음)
+  const saved = state.saved && state.saved.id !== dismissedId ? state.saved : null;
+
+  function writeAgain() {
+    setDismissedId(saved?.id ?? null);
+    setContent("");
+    setAuthor(null);
+    setPhoto(null);
+    setPhotoStatus("idle");
+    window.scrollTo({ top: 0 });
+  }
+
+  if (saved) {
     return (
-      <div className="rounded-2xl bg-pastel-pink px-6 py-12 text-center">
-        <HeartIcon size={40} className="mx-auto text-rose" />
-        <p className="mt-4 text-xl font-bold">메시지를 남겼어요!</p>
-        <p className="mt-3 text-sm text-ink-muted">{recipientName}님에게 소중하게 전달될 거예요.</p>
+      <div className="text-center">
+        <HeartIcon size={36} className="mx-auto text-rose" />
+        <p className="mt-3 text-xl font-bold">메시지를 남겼어요!</p>
+        <p className="mt-2 text-sm text-ink-muted">{recipientName}님에게 이렇게 전달될 거예요.</p>
+
+        <div className={`mt-6 rounded-2xl p-3 text-left ${preview.pageClass}`}>
+          <div className="grid grid-cols-2 gap-3">
+            <MessageCard
+              message={{ author_name: saved.authorName, content: saved.content }}
+              photoUrl={photo?.previewUrl}
+              cardClass={preview.cardClass}
+            />
+          </div>
+        </div>
+        <p className="mt-3 flex items-center justify-center gap-1 text-xs text-ink-muted">
+          <LockIcon size={13} />
+          다른 친구들의 메시지는 {recipientName}님만 볼 수 있어요.
+        </p>
+
+        <button type="button" onClick={writeAgain} className={`${buttonSecondary} mt-6 w-full`}>
+          하나 더 쓰기
+        </button>
       </div>
     );
   }

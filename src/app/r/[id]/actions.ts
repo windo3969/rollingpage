@@ -32,7 +32,8 @@ export async function unlockRoom(roomId: string, _prev: UnlockState, formData: F
 // ─── 메시지 작성 ─────────────────────────────────────
 
 export type SubmitState = {
-  done?: boolean;
+  // 저장 성공 시: 작성 완료 화면에서 "내 메시지 미리보기"로 보여줄 내용 (서버에 실제 저장된 값)
+  saved?: { id: string; authorName: string; content: string };
   error?: string;
   // participantId: 명단에서 고른 참여자 ID, "" = 명단에 없어요, null = 명단 없는 방
   values?: { authorName: string; content: string; participantId: string | null };
@@ -107,13 +108,17 @@ export async function submitMessage(roomId: string, _prev: SubmitState, formData
     }
   }
 
-  const { error } = await supabase.from("messages").insert({
-    room_id: room.id,
-    participant_id: linkedParticipantId,
-    author_name: authorName,
-    content,
-    photo_path: photoPath,
-  });
+  const { data: inserted, error } = await supabase
+    .from("messages")
+    .insert({
+      room_id: room.id,
+      participant_id: linkedParticipantId,
+      author_name: authorName,
+      content,
+      photo_path: photoPath,
+    })
+    .select("id")
+    .single();
 
   if (error) {
     console.error("submitMessage failed", error);
@@ -122,5 +127,5 @@ export async function submitMessage(roomId: string, _prev: SubmitState, formData
     return { error: "메시지를 저장하지 못했어요. 잠시 후 다시 시도해주세요.", values };
   }
 
-  return { done: true };
+  return { saved: { id: inserted.id, authorName, content } };
 }

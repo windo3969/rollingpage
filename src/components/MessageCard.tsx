@@ -1,5 +1,8 @@
-import { HeartIcon } from "@/components/icons";
 import type { Message } from "@/lib/rooms";
+import { HeartIcon } from "./icons";
+
+// 결과 페이지와 작성 완료 화면(내 메시지 미리보기)이 같은 카드를 쓴다.
+// 2열 그리드 안에 놓여야 폭(한 칸/두 칸)이 결과 페이지와 같아진다.
 
 // 자동 레이아웃: 글자 수에 따라 글씨 크기와 카드 폭을 정한다.
 // 짧은 글은 크게, 긴 글은 작게 + 두 칸 폭으로 → 어떤 조합이든 카드 밀도가 비슷해 정돈되어 보인다.
@@ -15,7 +18,7 @@ export function MessageCard({
   photoUrl,
   cardClass,
 }: {
-  message: Message;
+  message: Pick<Message, "author_name" | "content">;
   photoUrl?: string;
   cardClass: string;
 }) {

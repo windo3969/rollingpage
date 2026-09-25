@@ -4,6 +4,10 @@ export const buttonPrimary =
   "inline-flex items-center justify-center gap-2 rounded-full bg-rose px-6 py-4 text-base font-semibold text-white " +
   "transition-colors active:bg-rose-deep disabled:bg-rose-soft";
 
+export const buttonSecondary =
+  "inline-flex items-center justify-center gap-2 rounded-full border border-line bg-white px-6 py-3.5 text-base " +
+  "font-semibold text-ink transition-colors active:bg-cream";
+
 export const buttonSmall =
   "shrink-0 rounded-full bg-rose px-4 py-2 text-sm font-medium text-white transition-colors active:bg-rose-deep";
 
