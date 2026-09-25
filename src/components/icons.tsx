@@ -105,6 +105,22 @@ export const MessageIcon = (p: IconProps) => (
   </Icon>
 );
 
+export const LightbulbIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+    <path d="M9 18h6M10 22h4" />
+  </Icon>
+);
+
+export const RefreshIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+    <path d="M21 3v5h-5" />
+    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+    <path d="M8 16H3v5" />
+  </Icon>
+);
+
 export const ChevronRightIcon = (p: IconProps) => (
   <Icon {...p}>
     <path d="m9 18 6-6-6-6" />

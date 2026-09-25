@@ -8,6 +8,7 @@ import { MESSAGE_MAX_LENGTH, PHOTO_MAX_BYTES } from "@/lib/limits";
 import type { Participant } from "@/lib/rooms";
 import { submitMessage, type SubmitState } from "./actions";
 import { AuthorField } from "./AuthorField";
+import { HintBox } from "./HintBox";
 
 // 업로드 전 브라우저에서 압축: 저장·트래픽 비용 절감 + 서버 요청 크기 제한 준수
 const COMPRESSION = {
@@ -86,6 +87,8 @@ export function WriteForm({
 
   return (
     <form action={submit} className="flex flex-col gap-5">
+      <HintBox />
+
       <label className="flex flex-col gap-2">
         <span className={label}>메시지</span>
         <textarea
