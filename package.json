@@ -11,7 +11,8 @@
     "check:rls": "node --env-file=.env.local scripts/check-rls.mjs",
     "check:seo": "node scripts/check-seo.mjs",
     "seed:demo": "node --env-file=.env.local scripts/seed-demo.mjs",
-    "stats:pdf": "node --env-file=.env.local scripts/stats-pdf.mjs"
+    "stats:pdf": "node --env-file=.env.local scripts/stats-pdf.mjs",
+    "make:sample-pdf": "node scripts/make-sample-pdf.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.1",

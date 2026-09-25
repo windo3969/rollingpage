@@ -15,6 +15,8 @@ async function clean() {
     const { data: files } = await admin.storage.from("photos").list(id);
     if (files?.length) await admin.storage.from("photos").remove(files.map((f) => `${id}/${f.name}`));
   }
+  // 데모 방에서 누른 클릭 기록도 지운다 (방을 지우면 room_id가 null로 남아 수요 통계에 섞이므로 먼저 삭제)
+  await admin.from("events").delete().like("room_id", "DEMO%");
   const { count } = await admin.from("rooms").delete({ count: "exact" }).like("id", "DEMO%");
   console.log(`데모 방 ${count ?? 0}개 삭제`);
 }
