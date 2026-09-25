@@ -11,6 +11,7 @@ import { card, pageTitle } from "@/components/ui";
 import { formatDeadline } from "@/lib/format";
 import { countMessages, getParticipantStatuses, getRoomByHostToken, isClosed } from "@/lib/rooms";
 import { ParticipantManager } from "./ParticipantManager";
+import { ReminderCopy } from "./ReminderCopy";
 import { isTemplateId } from "@/lib/templates";
 import { TemplatePicker } from "./TemplatePicker";
 
@@ -36,6 +37,7 @@ export default async function HostPage(props: PageProps<"/host/[token]">) {
 
   const [messageCount, participants] = await Promise.all([countMessages(room.id), getParticipantStatuses(room.id)]);
   const unlistedCount = messageCount - participants.reduce((sum, p) => sum + p.messageCount, 0);
+  const pendingNames = participants.filter((p) => !p.written).map((p) => p.name);
   const closed = isClosed(room);
   const base = await origin();
   const shareUrl = `${base}/r/${room.id}`;
@@ -113,6 +115,14 @@ export default async function HostPage(props: PageProps<"/host/[token]">) {
               : "메시지를 받을 친구들의 이름을 넣어두면, 누가 썼고 누가 안 썼는지 확인할 수 있어요."}
           </p>
           <ParticipantManager token={token} participants={participants} unlistedCount={unlistedCount} />
+          {!closed && pendingNames.length > 0 && (
+            <ReminderCopy
+              pendingNames={pendingNames}
+              recipientName={room.recipient_name}
+              deadlineText={formatDeadline(room.deadline)}
+              shareUrl={shareUrl}
+            />
+          )}
         </section>
 
         <section className={`${card} mt-4`}>
