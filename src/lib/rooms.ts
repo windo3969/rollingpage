@@ -71,6 +71,22 @@ export async function getParticipants(roomId: string): Promise<Participant[]> {
   return data;
 }
 
+export type ParticipantStatus = Participant & { written: boolean; messageCount: number };
+
+// 주최자 대시보드 전용: 참여자별 작성 여부 (messages.participant_id로 계산, 별도 저장 없음)
+export async function getParticipantStatuses(roomId: string): Promise<ParticipantStatus[]> {
+  const { data, error } = await createAdminClient()
+    .from("participants")
+    .select("id, name, messages(count)")
+    .eq("room_id", roomId)
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return data.map(({ id, name, messages }) => {
+    const messageCount: number = messages[0]?.count ?? 0;
+    return { id, name, written: messageCount > 0, messageCount };
+  });
+}
+
 export async function countMessages(roomId: string): Promise<number> {
   const { count, error } = await createAdminClient()
     .from("messages")

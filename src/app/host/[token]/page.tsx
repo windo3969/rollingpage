@@ -9,7 +9,7 @@ import { SearchSafeNotice } from "@/components/SearchSafeNotice";
 import { CalendarIcon, LockIcon, MessageIcon } from "@/components/icons";
 import { card, pageTitle } from "@/components/ui";
 import { formatDeadline } from "@/lib/format";
-import { countMessages, getParticipants, getRoomByHostToken, isClosed } from "@/lib/rooms";
+import { countMessages, getParticipantStatuses, getRoomByHostToken, isClosed } from "@/lib/rooms";
 import { ParticipantManager } from "./ParticipantManager";
 import { isTemplateId } from "@/lib/templates";
 import { TemplatePicker } from "./TemplatePicker";
@@ -34,7 +34,8 @@ export default async function HostPage(props: PageProps<"/host/[token]">) {
   const room = await getRoomByHostToken(token);
   if (!room) notFound();
 
-  const [messageCount, participants] = await Promise.all([countMessages(room.id), getParticipants(room.id)]);
+  const [messageCount, participants] = await Promise.all([countMessages(room.id), getParticipantStatuses(room.id)]);
+  const unlistedCount = messageCount - participants.reduce((sum, p) => sum + p.messageCount, 0);
   const closed = isClosed(room);
   const base = await origin();
   const shareUrl = `${base}/r/${room.id}`;
@@ -104,12 +105,14 @@ export default async function HostPage(props: PageProps<"/host/[token]">) {
 
         <section className={`${card} mt-4`}>
           <h2 className="font-semibold">
-            참여자 명단 <span className="text-sm font-normal text-ink-muted">(선택)</span>
+            작성 현황 <span className="text-sm font-normal text-ink-muted">(명단 선택)</span>
           </h2>
           <p className="mt-1 text-sm text-ink-muted">
-            메시지를 받을 친구들의 이름을 넣어두면, 누가 썼고 누가 안 썼는지 확인할 수 있어요.
+            {participants.length > 0
+              ? "명단에서 이름을 고르고 쓴 사람은 작성 완료로 표시돼요. 이 현황은 주최자만 볼 수 있어요."
+              : "메시지를 받을 친구들의 이름을 넣어두면, 누가 썼고 누가 안 썼는지 확인할 수 있어요."}
           </p>
-          <ParticipantManager token={token} participants={participants} />
+          <ParticipantManager token={token} participants={participants} unlistedCount={unlistedCount} />
         </section>
 
         <section className={`${card} mt-4`}>
