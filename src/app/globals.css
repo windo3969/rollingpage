@@ -2,23 +2,22 @@
 
 /* 디자인 토큰 — docs/design/DESIGN.md 참고 (값은 시안 기준 근사치) */
 @theme inline {
-  --color-cream: #fbf6f0; /* 페이지 배경 */
+  --color-cream: #faf7f4; /* 페이지 배경 */
   --color-paper: #fdf3ea; /* 종이 느낌 영역 */
   --color-rose: #e58a8e; /* 주요 버튼, 하트 */
   --color-rose-deep: #d8757a; /* 주요 버튼 눌림 */
   --color-rose-soft: #f4c2c2; /* 비활성 버튼 */
-  --color-ink: #3d3632; /* 본문 */
-  --color-ink-muted: #8c817a; /* 보조 텍스트 */
-  --color-line: #ede4dc; /* 테두리 */
+  --color-ink: #33302e; /* 본문 */
+  --color-ink-muted: #8c847e; /* 보조 텍스트 */
+  --color-line: #ece6e1; /* 테두리 */
   --color-mint: #4fa89a; /* 완료, 진행률 */
-  --color-pastel-pink: #fbe3e3;
-  --color-pastel-yellow: #fcebc7;
-  --color-pastel-mint: #dff1e6;
-  --color-pastel-sky: #dde9f7;
+  --color-pastel-pink: #fdecec;
+  --color-pastel-yellow: #fdf3dc;
+  --color-pastel-mint: #e3f3ea;
+  --color-pastel-sky: #e6eef9;
+  --color-pastel-lavender: #eeebf8;
 
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-hand: var(--font-gaegu), "Pretendard Variable", sans-serif; /* 한글 손글씨: 제목, 메시지 카드 */
-  --font-script: var(--font-dancing-script), cursive; /* 영문 로고, 장식 */
 }
 
 /* 다크 모드는 디자인 단계에서 따로 다룬다. 그 전까지는 라이트 고정 */
@@ -28,4 +27,5 @@
 
 body {
   @apply bg-cream font-sans text-ink;
+  letter-spacing: -0.01em;
 }

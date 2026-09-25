@@ -15,6 +15,8 @@ export const label = "text-sm font-medium text-ink";
 
 export const hint = "text-xs text-ink-muted";
 
-export const card = "rounded-2xl bg-white p-5 shadow-[0_1px_8px_rgba(61,54,50,0.06)]";
+export const card = "rounded-2xl border border-line bg-white p-5";
+
+export const pageTitle = "text-2xl font-bold tracking-tight";
 
 export const errorBox = "rounded-lg bg-pastel-pink px-4 py-3 text-sm text-rose-deep";

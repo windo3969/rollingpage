@@ -6,9 +6,10 @@ import { CopyButton } from "@/components/CopyButton";
 import { KakaoShareButton } from "@/components/KakaoShareButton";
 import { PdfInterestButton } from "@/components/PdfInterestButton";
 import { SearchSafeNotice } from "@/components/SearchSafeNotice";
-import { card } from "@/components/ui";
+import { CalendarIcon, LockIcon, MessageIcon } from "@/components/icons";
+import { card, pageTitle } from "@/components/ui";
 import { formatDeadline } from "@/lib/format";
-import { countMessages, getRoomByHostToken } from "@/lib/rooms";
+import { countMessages, getRoomByHostToken, isClosed } from "@/lib/rooms";
 import { isTemplateId } from "@/lib/templates";
 import { TemplatePicker } from "./TemplatePicker";
 
@@ -33,6 +34,7 @@ export default async function HostPage(props: PageProps<"/host/[token]">) {
   if (!room) notFound();
 
   const messageCount = await countMessages(room.id);
+  const closed = isClosed(room);
   const base = await origin();
   const shareUrl = `${base}/r/${room.id}`;
   const resultUrl = `${base}/v/${room.result_id}`;
@@ -42,17 +44,47 @@ export default async function HostPage(props: PageProps<"/host/[token]">) {
     <>
       <AppHeader />
       <main className="mx-auto w-full max-w-md flex-1 px-5 py-10">
-        <p className="text-sm text-ink-muted">{room.recipient_name}님에게</p>
-        <h1 className="mt-1 font-hand text-3xl font-bold">{room.title}</h1>
-        <p className="mt-2 text-sm text-ink-muted">
-          작성 마감: {formatDeadline(room.deadline)}
-          {room.password_hash && " · 비밀번호 설정됨"}
-        </p>
-        <p className="mt-4 inline-block rounded-full bg-pastel-mint px-3 py-1 text-sm font-medium">
-          지금까지 {messageCount}개의 메시지가 모였어요
-        </p>
+        <h1 className={pageTitle}>방 관리하기</h1>
+        <p className="mt-2 text-sm text-ink-muted">링크를 공유하고, 모인 롤링페이퍼를 전달해보세요.</p>
 
         <section className={`${card} mt-6`}>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs text-ink-muted">{room.recipient_name}님에게</p>
+              <p className="mt-1 font-semibold break-words">{room.title}</p>
+            </div>
+            <span
+              className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
+                closed ? "bg-line text-ink-muted" : "bg-pastel-mint text-mint"
+              }`}
+            >
+              {closed ? "마감" : "진행중"}
+            </span>
+          </div>
+          <dl className="mt-4 flex flex-col gap-2 text-sm text-ink-muted">
+            <div className="flex items-center gap-2">
+              <CalendarIcon size={16} />
+              <dt className="sr-only">마감일</dt>
+              <dd>{formatDeadline(room.deadline)} 마감</dd>
+            </div>
+            <div className="flex items-center gap-2">
+              <MessageIcon size={16} />
+              <dt className="sr-only">메시지</dt>
+              <dd>
+                지금까지 <strong className="font-semibold text-ink">{messageCount}개</strong>의 메시지가 모였어요
+              </dd>
+            </div>
+            {room.password_hash && (
+              <div className="flex items-center gap-2">
+                <LockIcon size={16} />
+                <dt className="sr-only">비밀번호</dt>
+                <dd>비밀번호 설정됨</dd>
+              </div>
+            )}
+          </dl>
+        </section>
+
+        <section className={`${card} mt-4`}>
           <h2 className="font-semibold">① 친구들에게 공유할 링크</h2>
           <p className="mt-1 text-sm text-ink-muted">이 링크로 들어온 사람은 메시지를 쓸 수 있어요.</p>
           <div className="mt-3 flex items-center gap-2">

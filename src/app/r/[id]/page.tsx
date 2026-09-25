@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
+import { CalendarIcon } from "@/components/icons";
 import { SearchSafeNotice } from "@/components/SearchSafeNotice";
+import { card, pageTitle } from "@/components/ui";
 import { formatDeadline } from "@/lib/format";
 import { ogMetadata } from "@/lib/og";
 import { getRoom, hasRoomAccess, isClosed } from "@/lib/rooms";
@@ -30,12 +32,15 @@ export default async function WritePage(props: PageProps<"/r/[id]">) {
       <AppHeader />
       <main className="mx-auto w-full max-w-md flex-1 px-5 py-10">
         <p className="text-sm text-ink-muted">{room.recipient_name}님에게</p>
-        <h1 className="mt-1 font-hand text-3xl font-bold">{room.title}</h1>
-        <p className="mt-2 text-sm text-ink-muted">작성 마감: {formatDeadline(room.deadline)}</p>
+        <h1 className={`mt-1 ${pageTitle}`}>{room.title}</h1>
+        <p className="mt-2 flex items-center gap-1.5 text-sm text-ink-muted">
+          <CalendarIcon size={15} />
+          {formatDeadline(room.deadline)}까지 작성할 수 있어요
+        </p>
 
         <div className="mt-8">
           {closed ? (
-            <div className="rounded-2xl bg-white px-6 py-12 text-center">
+            <div className={`${card} px-6 py-12 text-center`}>
               <p className="font-semibold">작성 기간이 끝났어요</p>
               <p className="mt-2 text-sm text-ink-muted">더 이상 메시지를 남길 수 없어요.</p>
             </div>

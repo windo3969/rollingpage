@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { HeartIcon } from "@/components/icons";
 import { PdfInterestButton } from "@/components/PdfInterestButton";
 import { SearchSafeNotice } from "@/components/SearchSafeNotice";
 import { ogMetadata } from "@/lib/og";
@@ -32,10 +33,10 @@ export default async function ResultPage(props: PageProps<"/v/[resultId]">) {
     <div className={`flex flex-1 flex-col ${template.page}`}>
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-12">
         <header className="text-center">
-          <p className="text-xl text-rose">♡</p>
-          <h1 className="mt-2 font-hand text-4xl leading-tight font-bold">{room.title}</h1>
-          <p className="mt-3 font-hand text-xl text-ink-muted">
-            {room.recipient_name}에게 도착한 {messages.length}개의 마음
+          <HeartIcon size={24} className="mx-auto text-rose" />
+          <h1 className="mt-3 text-2xl leading-snug font-bold tracking-tight">{room.title}</h1>
+          <p className="mt-2 text-sm text-ink-muted">
+            {room.recipient_name}님에게 도착한 {messages.length}개의 마음
           </p>
         </header>
 
@@ -43,14 +44,13 @@ export default async function ResultPage(props: PageProps<"/v/[resultId]">) {
           <p className="mt-16 text-center text-ink-muted">아직 도착한 메시지가 없어요.</p>
         ) : (
           // 2열 그리드 + dense: 한 칸 카드가 빈자리를 채우고, 같은 줄 카드는 높이가 맞춰진다
-          <div className="mt-12 grid grid-flow-row-dense grid-cols-2 gap-x-3 gap-y-5">
+          <div className="mt-10 grid grid-flow-row-dense grid-cols-2 gap-3">
             {messages.map((message, i) => (
               <MessageCard
                 key={message.id}
                 message={message}
                 photoUrl={message.photo_path ? photoUrls.get(message.photo_path) : undefined}
-                index={i}
-                cardClass={template.card}
+                cardClass={template.cards[i % template.cards.length]}
               />
             ))}
           </div>
@@ -63,7 +63,10 @@ export default async function ResultPage(props: PageProps<"/v/[resultId]">) {
         )}
 
         <footer className="mt-16 flex flex-col items-center gap-3">
-          <p className="font-script text-xl text-ink-muted">Rolling Paper</p>
+          <p className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-muted">
+            <HeartIcon size={16} className="text-rose" />
+            RollingPaper
+          </p>
           <SearchSafeNotice />
         </footer>
       </main>

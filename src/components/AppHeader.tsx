@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { HeartIcon } from "./icons";
 
 export function Logo() {
   return (
-    <Link href="/" className="font-script text-2xl font-semibold text-ink">
-      Rolling Paper<span className="ml-0.5 align-top text-xs text-rose">♥</span>
+    <Link href="/" className="inline-flex items-center gap-1.5 text-lg font-semibold tracking-tight text-ink">
+      <HeartIcon size={22} className="text-rose" />
+      RollingPaper
     </Link>
   );
 }

@@ -1,24 +1,10 @@
 import type { Metadata } from "next";
-import { Dancing_Script, Gaegu } from "next/font/google";
-// 본문 폰트: Pretendard 동적 서브셋 (페이지에 쓰인 글자 범위만 내려받음, 자체 호스팅)
+// 글꼴: Pretendard 하나만 사용. 동적 서브셋이라 페이지에 쓰인 글자 범위만 내려받는다 (자체 호스팅)
 import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "./globals.css";
 import { noIndexRobots } from "@/lib/seo";
 import { ogMetadata } from "@/lib/og";
 import { siteUrl } from "@/lib/site";
-
-// 한글 손글씨 (제목, 메시지 카드)
-const gaegu = Gaegu({
-  variable: "--font-gaegu",
-  weight: ["400", "700"],
-  preload: false, // 한글 폰트는 용량이 커서 미리 불러오지 않는다
-});
-
-// 영문 스크립트 (로고, 장식)
-const dancingScript = Dancing_Script({
-  variable: "--font-dancing-script",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   metadataBase: siteUrl(),
@@ -30,7 +16,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="ko" className={`${gaegu.variable} ${dancingScript.variable} h-full antialiased`}>
+    <html lang="ko" className="h-full antialiased">
       <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );

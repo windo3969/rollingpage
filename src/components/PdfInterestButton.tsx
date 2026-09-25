@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { recordPdfInterest, type PdfInterestSource } from "@/lib/events";
+import { BookIcon } from "./icons";
 
 // 수요 검증용 버튼 (CLAUDE.md Phase 1-8). 누르면 클릭만 기록하고 "준비 중" 안내를 보여준다.
 export function PdfInterestButton({ source, recordKey }: { source: PdfInterestSource; recordKey: string }) {
@@ -18,9 +19,9 @@ export function PdfInterestButton({ source, recordKey }: { source: PdfInterestSo
       <button
         type="button"
         onClick={onClick}
-        className="inline-flex items-center gap-2 rounded-full border-2 border-rose bg-white px-5 py-3 text-sm font-semibold text-rose"
+        className="inline-flex items-center gap-2 rounded-full border border-rose bg-white px-5 py-3 text-sm font-semibold text-rose"
       >
-        <span aria-hidden>📖</span>
+        <BookIcon size={18} />
         포토북 PDF 받기
         <span className="rounded-full bg-pastel-pink px-2 py-0.5 text-xs font-medium">준비 중</span>
       </button>

@@ -2,6 +2,7 @@
 
 import imageCompression from "browser-image-compression";
 import { useActionState, useEffect, useState } from "react";
+import { HeartIcon, ImageIcon } from "@/components/icons";
 import { buttonPrimary, errorBox, hint, input, label } from "@/components/ui";
 import { AUTHOR_MAX_LENGTH, MESSAGE_MAX_LENGTH, PHOTO_MAX_BYTES } from "@/lib/limits";
 import { submitMessage, type SubmitState } from "./actions";
@@ -61,9 +62,9 @@ export function WriteForm({ roomId, recipientName }: { roomId: string; recipient
 
   if (state.done) {
     return (
-      <div className="rounded-2xl bg-paper px-6 py-12 text-center">
-        <p className="text-4xl text-rose">♡</p>
-        <p className="mt-4 font-hand text-3xl font-bold">메시지를 남겼어요!</p>
+      <div className="rounded-2xl bg-pastel-pink px-6 py-12 text-center">
+        <HeartIcon size={40} className="mx-auto text-rose" />
+        <p className="mt-4 text-xl font-bold">메시지를 남겼어요!</p>
         <p className="mt-3 text-sm text-ink-muted">{recipientName}님에게 소중하게 전달될 거예요.</p>
       </div>
     );
@@ -105,13 +106,12 @@ export function WriteForm({ roomId, recipientName }: { roomId: string; recipient
             </button>
           </div>
         ) : (
-          <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-line bg-white py-10 text-center">
-            <span className="text-3xl" aria-hidden>
-              🖼️
-            </span>
-            <span className="text-sm text-ink-muted">
+          <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-ink-muted/40 bg-white py-10 text-center text-ink-muted">
+            <ImageIcon size={28} />
+            <span className="text-sm">
               {photoStatus === "compressing" ? "사진 준비 중…" : "사진을 첨부해주세요"}
             </span>
+            <span className="text-xs text-ink-muted/80">(1장만 가능)</span>
             <input type="file" accept="image/*" onChange={onPhotoChange} className="sr-only" />
           </label>
         )}
