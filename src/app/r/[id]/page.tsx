@@ -6,7 +6,7 @@ import { SearchSafeNotice } from "@/components/SearchSafeNotice";
 import { card, pageTitle } from "@/components/ui";
 import { formatDeadline } from "@/lib/format";
 import { ogMetadata } from "@/lib/og";
-import { getRoom, hasRoomAccess, isClosed } from "@/lib/rooms";
+import { getParticipants, getRoom, hasRoomAccess, isClosed } from "@/lib/rooms";
 import { PasswordGate } from "./PasswordGate";
 import { WriteForm } from "./WriteForm";
 
@@ -26,6 +26,8 @@ export default async function WritePage(props: PageProps<"/r/[id]">) {
 
   const closed = isClosed(room);
   const unlocked = await hasRoomAccess(room);
+  // 명단(친구 이름)은 작성할 수 있는 사람에게만 내려준다 (비밀번호 통과 전·마감 후에는 조회하지 않음)
+  const participants = unlocked && !closed ? await getParticipants(room.id) : [];
 
   return (
     <>
@@ -45,7 +47,7 @@ export default async function WritePage(props: PageProps<"/r/[id]">) {
               <p className="mt-2 text-sm text-ink-muted">더 이상 메시지를 남길 수 없어요.</p>
             </div>
           ) : unlocked ? (
-            <WriteForm roomId={room.id} recipientName={room.recipient_name} />
+            <WriteForm roomId={room.id} recipientName={room.recipient_name} participants={participants} />
           ) : (
             <PasswordGate roomId={room.id} />
           )}

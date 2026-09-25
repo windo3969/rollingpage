@@ -4,8 +4,10 @@ import imageCompression from "browser-image-compression";
 import { useActionState, useEffect, useState } from "react";
 import { HeartIcon, ImageIcon } from "@/components/icons";
 import { buttonPrimary, errorBox, hint, input, label } from "@/components/ui";
-import { AUTHOR_MAX_LENGTH, MESSAGE_MAX_LENGTH, PHOTO_MAX_BYTES } from "@/lib/limits";
+import { MESSAGE_MAX_LENGTH, PHOTO_MAX_BYTES } from "@/lib/limits";
+import type { Participant } from "@/lib/rooms";
 import { submitMessage, type SubmitState } from "./actions";
+import { AuthorField } from "./AuthorField";
 
 // 업로드 전 브라우저에서 압축: 저장·트래픽 비용 절감 + 서버 요청 크기 제한 준수
 const COMPRESSION = {
@@ -18,9 +20,18 @@ const COMPRESSION = {
 
 type Photo = { file: File; previewUrl: string };
 
-export function WriteForm({ roomId, recipientName }: { roomId: string; recipientName: string }) {
+export function WriteForm({
+  roomId,
+  recipientName,
+  participants,
+}: {
+  roomId: string;
+  recipientName: string;
+  participants: Participant[];
+}) {
   const [state, formAction, pending] = useActionState<SubmitState, FormData>(submitMessage.bind(null, roomId), {});
   const [content, setContent] = useState("");
+  const [author, setAuthor] = useState<string | null>(null); // 명단에서 고른 참여자 ID, 또는 NOT_LISTED
   const [photo, setPhoto] = useState<Photo | null>(null);
   const [photoStatus, setPhotoStatus] = useState<"idle" | "compressing" | "error">("idle");
 
@@ -28,7 +39,10 @@ export function WriteForm({ roomId, recipientName }: { roomId: string; recipient
   const [restoredFrom, setRestoredFrom] = useState(state.values);
   if (state.values !== restoredFrom) {
     setRestoredFrom(state.values);
-    if (state.values) setContent(state.values.content);
+    if (state.values) {
+      setContent(state.values.content);
+      setAuthor(state.values.participantId);
+    }
   }
 
   // 미리보기 URL 정리
@@ -122,17 +136,12 @@ export function WriteForm({ roomId, recipientName }: { roomId: string; recipient
         )}
       </div>
 
-      <label className="flex flex-col gap-2">
-        <span className={label}>보내는 사람</span>
-        <input
-          name="authorName"
-          required
-          maxLength={AUTHOR_MAX_LENGTH}
-          placeholder="이름 또는 닉네임"
-          defaultValue={state.values?.authorName}
-          className={input}
-        />
-      </label>
+      <AuthorField
+        participants={participants}
+        selected={author}
+        onSelect={setAuthor}
+        defaultName={state.values?.authorName}
+      />
 
       {state.error && (
         <p role="alert" className={errorBox}>

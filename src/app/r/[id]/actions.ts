@@ -34,8 +34,11 @@ export async function unlockRoom(roomId: string, _prev: UnlockState, formData: F
 export type SubmitState = {
   done?: boolean;
   error?: string;
-  values?: { authorName: string; content: string };
+  // participantId: 명단에서 고른 참여자 ID, "" = 명단에 없어요, null = 명단 없는 방
+  values?: { authorName: string; content: string; participantId: string | null };
 };
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // 확장자·Content-Type을 믿지 않고 파일 앞부분(매직 바이트)으로 형식을 판별한다
 function detectImageType(bytes: Uint8Array): { mime: string; ext: string } | null {
@@ -48,10 +51,12 @@ function detectImageType(bytes: Uint8Array): { mime: string; ext: string } | nul
 }
 
 export async function submitMessage(roomId: string, _prev: SubmitState, formData: FormData): Promise<SubmitState> {
-  const authorName = String(formData.get("authorName") ?? "").trim();
+  let authorName = String(formData.get("authorName") ?? "").trim();
   const content = String(formData.get("content") ?? "").trim();
   const photo = formData.get("photo");
-  const values = { authorName, content };
+  const rawParticipantId = formData.get("participantId");
+  const participantId = rawParticipantId === null ? null : String(rawParticipantId);
+  const values = { authorName, content, participantId };
 
   // 페이지에서 확인했더라도 서버에서 방 상태·권한을 다시 확인한다
   const room = await getRoom(roomId);
@@ -61,12 +66,28 @@ export async function submitMessage(roomId: string, _prev: SubmitState, formData
 
   if (content.length < 1 || content.length > MESSAGE_MAX_LENGTH)
     return { error: `메시지는 1~${MESSAGE_MAX_LENGTH}자로 작성해주세요.`, values };
+
+  const supabase = createAdminClient();
+
+  // 명단에서 이름을 골랐다면, 그 참여자가 이 방 명단에 있는지 서버에서 확인하고 이름도 명단 값을 쓴다
+  let linkedParticipantId: string | null = null;
+  if (participantId) {
+    if (!UUID_PATTERN.test(participantId)) return { error: "이름을 다시 골라주세요.", values };
+    const { data: participant } = await supabase
+      .from("participants")
+      .select("id, name")
+      .eq("id", participantId)
+      .eq("room_id", room.id)
+      .maybeSingle();
+    if (!participant) return { error: "명단이 바뀌었어요. 새로고침 후 이름을 다시 골라주세요.", values };
+    linkedParticipantId = participant.id;
+    authorName = participant.name;
+  }
+
   if (authorName.length < 1 || authorName.length > AUTHOR_MAX_LENGTH)
     return { error: `이름은 1~${AUTHOR_MAX_LENGTH}자로 입력해주세요.`, values };
 
   if (!(await checkRateLimit("submitMessage", room.id))) return { error: RATE_LIMIT_MESSAGE, values };
-
-  const supabase = createAdminClient();
   let photoPath: string | null = null;
 
   if (photo instanceof File && photo.size > 0) {
@@ -88,6 +109,7 @@ export async function submitMessage(roomId: string, _prev: SubmitState, formData
 
   const { error } = await supabase.from("messages").insert({
     room_id: room.id,
+    participant_id: linkedParticipantId,
     author_name: authorName,
     content,
     photo_path: photoPath,
