@@ -99,7 +99,7 @@ export function WriteForm({
         <p className="mt-2 text-sm text-ink-muted">{recipientName}님에게 이렇게 전달될 거예요.</p>
 
         <div className={`mt-6 rounded-2xl p-3 text-left ${preview.pageClass}`}>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="columns-2 gap-3">
             <MessageCard
               message={{ author_name: saved.authorName, content: saved.content }}
               photoUrl={photo?.previewUrl}

@@ -19,8 +19,8 @@ async function clean() {
   console.log(`데모 방 ${count ?? 0}개 삭제`);
 }
 
-// 사진 대용 단색 1x1 PNG (외부 이미지 없이 직접 인코딩, 화면에서는 늘어나 보인다)
-function solidPng(r, g, b) {
+// 사진 대용 단색 PNG (외부 이미지 없이 직접 인코딩). 가로·세로 비율을 달리해 실제 사진처럼 높이가 제각각 보이게 한다
+function solidPng([r, g, b], [width, height] = [4, 3]) {
   return import("node:zlib").then(({ deflateSync, crc32 }) => {
     const chunk = (type, data) => {
       const len = Buffer.alloc(4);
@@ -31,14 +31,15 @@ function solidPng(r, g, b) {
       return Buffer.concat([len, body, crc]);
     };
     const ihdr = Buffer.alloc(13);
-    ihdr.writeUInt32BE(1, 0);
-    ihdr.writeUInt32BE(1, 4);
+    ihdr.writeUInt32BE(width, 0);
+    ihdr.writeUInt32BE(height, 4);
     ihdr[8] = 8; // bit depth
     ihdr[9] = 2; // RGB
     return Buffer.concat([
       Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
       chunk("IHDR", ihdr),
-      chunk("IDAT", deflateSync(Buffer.from([0, r, g, b]))),
+      // 각 줄: 필터 바이트(0) + 픽셀마다 RGB
+      chunk("IDAT", deflateSync(Buffer.concat(Array.from({ length: height }, () => Buffer.from([0, ...Array(width).fill([r, g, b]).flat()]))))),
       chunk("IEND", Buffer.alloc(0)),
     ]);
   });
@@ -46,13 +47,14 @@ function solidPng(r, g, b) {
 
 const MESSAGES = [
   { author: "수연", content: "생일 축하해!! 🎉" },
-  { author: "민지", content: "지민아! 항상 밝고 좋은 에너지 주는 너라서 너무 고마워. 앞으로도 쭉 행복하자 :)", photo: [251, 200, 200] },
+  { author: "민지", content: "지민아! 항상 밝고 좋은 에너지 주는 너라서 너무 고마워. 앞으로도 쭉 행복하자 :)", photo: [251, 200, 200], ratio: [3, 4] },
   { author: "지훈", content: "너의 모든 날을 응원해" },
   {
     author: "하은",
     content:
       "지민아, 올해도 네 생일을 같이 축하할 수 있어서 정말 기뻐. 처음 만났던 날 기억나? 그때는 이렇게 오래 친구가 될 줄 몰랐는데, 어느새 서로의 가장 가까운 사람이 됐네. 힘들 때마다 옆에 있어줘서 고마워. 이번 해에는 네가 하고 싶은 일들 전부 이뤄지길!",
     photo: [255, 214, 165],
+    ratio: [4, 3],
   },
   { author: "준호", content: "맛있는 거 먹으러 가자 🍰 내가 쏠게!" },
   {
@@ -60,7 +62,7 @@ const MESSAGES = [
     content:
       "생일 진심으로 축하해! 요즘 바빠서 자주 못 봤지만 늘 생각하고 있어.\n다음 달에 꼭 보자.\n\n선물은 만나서 줄게 😉",
   },
-  { author: "도윤", content: "HBD 🎂", photo: [200, 225, 240] },
+  { author: "도윤", content: "HBD 🎂", photo: [200, 225, 240], ratio: [9, 16] },
 ];
 
 async function seed() {
@@ -83,7 +85,7 @@ async function seed() {
     let photoPath = null;
     if (m.photo) {
       photoPath = `${id}/${randomBytes(8).toString("hex")}.png`;
-      const png = await solidPng(...m.photo);
+      const png = await solidPng(m.photo, m.ratio);
       const up = await admin.storage.from("photos").upload(photoPath, png, { contentType: "image/png" });
       if (up.error) throw up.error;
     }

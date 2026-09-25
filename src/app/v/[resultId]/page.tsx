@@ -43,8 +43,8 @@ export default async function ResultPage(props: PageProps<"/v/[resultId]">) {
         {messages.length === 0 ? (
           <p className="mt-16 text-center text-ink-muted">아직 도착한 메시지가 없어요.</p>
         ) : (
-          // 2열 그리드 + dense: 한 칸 카드가 빈자리를 채우고, 같은 줄 카드는 높이가 맞춰진다
-          <div className="mt-10 grid grid-flow-row-dense grid-cols-2 gap-3">
+          // 2열 벽돌(masonry) 배치: 카드마다 높이가 달라도(사진 원본 비율 등) 빈틈 없이 쌓인다
+          <div className="mt-10 columns-2 gap-3">
             {messages.map((message, i) => (
               <MessageCard
                 key={message.id}
