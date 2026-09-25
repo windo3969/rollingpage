@@ -3,5 +3,9 @@
 export const MESSAGE_MAX_LENGTH = 500;
 export const AUTHOR_MAX_LENGTH = 30;
 
+// 참여자 명단 (Phase 2). 이름 길이는 DB 제약(1~30자)과 같다.
+export const PARTICIPANT_MAX = 100;
+export const PARTICIPANT_NAME_MAX_LENGTH = 30;
+
 // 브라우저에서 압축한 뒤의 사진 크기 상한 (버킷 file_size_limit와 동일)
 export const PHOTO_MAX_BYTES = 2 * 1024 * 1024;

@@ -59,6 +59,18 @@ export async function getMessages(roomId: string): Promise<Message[]> {
   return data;
 }
 
+export type Participant = { id: string; name: string };
+
+export async function getParticipants(roomId: string): Promise<Participant[]> {
+  const { data, error } = await createAdminClient()
+    .from("participants")
+    .select("id, name")
+    .eq("room_id", roomId)
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return data;
+}
+
 export async function countMessages(roomId: string): Promise<number> {
   const { count, error } = await createAdminClient()
     .from("messages")

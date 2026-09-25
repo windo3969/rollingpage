@@ -9,7 +9,8 @@ import { SearchSafeNotice } from "@/components/SearchSafeNotice";
 import { CalendarIcon, LockIcon, MessageIcon } from "@/components/icons";
 import { card, pageTitle } from "@/components/ui";
 import { formatDeadline } from "@/lib/format";
-import { countMessages, getRoomByHostToken, isClosed } from "@/lib/rooms";
+import { countMessages, getParticipants, getRoomByHostToken, isClosed } from "@/lib/rooms";
+import { ParticipantManager } from "./ParticipantManager";
 import { isTemplateId } from "@/lib/templates";
 import { TemplatePicker } from "./TemplatePicker";
 
@@ -33,7 +34,7 @@ export default async function HostPage(props: PageProps<"/host/[token]">) {
   const room = await getRoomByHostToken(token);
   if (!room) notFound();
 
-  const messageCount = await countMessages(room.id);
+  const [messageCount, participants] = await Promise.all([countMessages(room.id), getParticipants(room.id)]);
   const closed = isClosed(room);
   const base = await origin();
   const shareUrl = `${base}/r/${room.id}`;
@@ -99,6 +100,16 @@ export default async function HostPage(props: PageProps<"/host/[token]">) {
               buttonTitle="메시지 쓰러 가기"
             />
           </div>
+        </section>
+
+        <section className={`${card} mt-4`}>
+          <h2 className="font-semibold">
+            참여자 명단 <span className="text-sm font-normal text-ink-muted">(선택)</span>
+          </h2>
+          <p className="mt-1 text-sm text-ink-muted">
+            메시지를 받을 친구들의 이름을 넣어두면, 누가 썼고 누가 안 썼는지 확인할 수 있어요.
+          </p>
+          <ParticipantManager token={token} participants={participants} />
         </section>
 
         <section className={`${card} mt-4`}>

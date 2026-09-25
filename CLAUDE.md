@@ -110,8 +110,8 @@ rooms
 participants          -- Phase 2
   id              uuid  PK
   room_id         text  FK → rooms.id
-  name            text
-  has_written     boolean
+  name            text  (방 안에서 중복 불가)
+  -- 작성 여부는 저장하지 않고 messages.participant_id로 계산한다 (값이 어긋날 일이 없도록)
 
 messages
   id              uuid  PK
@@ -168,6 +168,7 @@ events                -- 수요 검증용 (IP·기기·URL은 저장하지 않�
 
 ### 이후 확장 후보
 - 회원 로그인, 롤링페이퍼 히스토리, 템플릿 재사용
+- 주최자 링크 분실 대비: 주최자 페이지에 "카톡 나에게 보내기" 버튼 (1순위, 간편). 대안으로 관리 비밀번호로 되찾기, 브라우저 자동 기억
 - 결혼/돌잔치, 학교/직장 타겟 확장
 - 실물 포토북 인쇄 대행
 - 카카오 알림톡 자동 리마인더
