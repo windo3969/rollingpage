@@ -83,7 +83,7 @@
 | 카톡 공유 | Kakao JavaScript SDK | |
 | 결제 | 토스페이먼츠 | Phase 3 |
 | PDF 생성 | Puppeteer/Playwright 기반 별도 워커 서버 (Railway, Fly.io 등) | Phase 3, Vercel 서버리스에서 돌리지 않음 |
-| 분석 | 자체 `events` 테이블 (`npm run stats:pdf`) | PDF 버튼 수요 측정. 외부 분석 도구(GA4, PostHog 등)는 페이지 URL(방 ID·결과 ID·주최자 토큰)을 외부로 보내므로 쓰지 않는다. 도입 시 URL에서 ID·토큰을 제거하고 보낼 것 |
+| 분석 | 자체 DB 집계: `npm run stats` (방·메시지·명단 작성률·미리보기 클릭·사진 누락 점검, 숫자만 출력) / `events` 테이블 | PDF 버튼 수요 측정. 외부 분석 도구(GA4, PostHog 등)는 페이지 URL(방 ID·결과 ID·주최자 토큰)을 외부로 보내므로 쓰지 않는다. 도입 시 URL에서 ID·토큰을 제거하고 보낼 것 |
 
 **환경 변수** (`.env.local`, 절대 커밋하지 않음)
 - `NEXT_PUBLIC_SUPABASE_URL`
