@@ -42,7 +42,14 @@
 ### 유료
 | 기능 | 설명 |
 |---|---|
-| 실물 포토북 제작 | **주 수익원.** 무료 PDF와 같은 레이아웃을 인쇄·제본해 배송 (인쇄 업체 연동, 가격 미정) |
+| 실물 포토북 제작 | **주 수익원.** 무료 PDF와 같은 레이아웃을 인쇄·제본한 소책자를 배송. 예상가 **5,000원** |
+
+**실물 포토북 무료 제작 이벤트 (구매 전환 측정)**: 포토북 미리보기(`/photobook/sample`)에서 선착순 200명 무료 신청을 받는다.
+- 받는 정보: 이름(닉네임), 휴대폰 번호, 개인정보 수집·이용 동의만. 주소는 연락할 때 따로 받는다
+- 보관: 이벤트 종료 시까지 → 종료 후 `npm run photobook:requests -- --purge`로 파기. 광고·홍보에 쓰지 않는다
+- 남은 자리는 실제 신청 수로 계산해 표시한다 (임의의 숫자 표시 금지)
+- 지표: `npm run stats`의 전환율(신청 ÷ 미리보기). 신청자 목록: `npm run photobook:requests`
+- 정원·가격은 `src/lib/photobook.ts`
 | 프리미엄 템플릿 | 추가 디자인 템플릿 |
 
 ### 명시적으로 제외한 것 (MVP 범위 밖)
@@ -129,6 +136,14 @@ events                -- 수요 검증용 (IP·기기·URL은 저장하지 않�
   name            text  (pdf_interest)
   source          text  (result | host)
   room_id         text  nullable FK → rooms.id (방 삭제 시 null)
+  created_at      timestamptz
+
+photobook_requests    -- 실물 포토북 무료 제작 신청 (개인정보: 이벤트 종료 시 파기)
+  id              uuid  PK
+  name            text  (이름 또는 닉네임)
+  phone           text  unique (숫자만, 01012345678)
+  source          text  (result | host | direct — 미리보기를 연 곳)
+  consented_at    timestamptz (개인정보 수집·이용 동의 시각)
   created_at      timestamptz
 ```
 

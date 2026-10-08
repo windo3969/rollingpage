@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import { Gaegu } from "next/font/google";
 import { Logo } from "@/components/AppHeader";
 import { BackButton } from "@/components/BackButton";
-import { buttonPrimary, buttonSecondary } from "@/components/ui";
+import { buttonSecondary } from "@/components/ui";
+import { isPhotobookSource, PHOTOBOOK_EVENT, type PhotobookSource } from "@/lib/photobook";
+import { countPhotobookRequests } from "@/lib/photobookRequests";
 import { ClosingPage, CoverPage, MessagePage, ThanksPage } from "./PhotobookPages";
 import { PhotobookViewer } from "./PhotobookViewer";
-import { SAMPLE, SAMPLE_PAGES, SAMPLE_PDF_PATH } from "./sampleData";
+import { RequestForm } from "./RequestForm";
+import { SAMPLE, SAMPLE_PAGES } from "./sampleData";
 import "./print.css";
 
 export const metadata: Metadata = {
@@ -19,7 +22,12 @@ const bookHand = Gaegu({ weight: ["400", "700"], variable: "--font-book-hand", p
 // 목차(2쪽) 다음부터 메시지 페이지 번호가 매겨진다
 const FIRST_MESSAGE_PAGE = 3;
 
-export default function PhotobookSamplePage() {
+export default async function PhotobookSamplePage(props: PageProps<"/photobook/sample">) {
+  // 어디서 미리보기를 열었는지 (전환율을 결과/주최자 페이지별로 보기 위해)
+  const from = (await props.searchParams).from;
+  const source: PhotobookSource = typeof from === "string" && isPhotobookSource(from) ? from : "direct";
+  const remaining = Math.max(0, PHOTOBOOK_EVENT.freeQuota - (await countPhotobookRequests()));
+
   const thanks = SAMPLE_PAGES.flatMap((page, i) => {
     const pageNumber = FIRST_MESSAGE_PAGE + i;
     return page.layout === "twoNotes"
@@ -57,10 +65,7 @@ export default function PhotobookSamplePage() {
         </div>
 
         <div className="mx-auto mt-8 max-w-md px-5 print:hidden">
-          <a href={SAMPLE_PDF_PATH} download className={`${buttonPrimary} w-full`}>
-            샘플 PDF 다운로드 (무료)
-          </a>
-          <p className="mt-3 text-center text-xs text-ink-muted">A5 크기 · 인쇄해서 바로 쓸 수 있어요</p>
+          <RequestForm source={source} remaining={remaining} />
           <BackButton className={`${buttonSecondary} mt-6 w-full`}>롤링페이퍼로 돌아가기</BackButton>
         </div>
       </main>

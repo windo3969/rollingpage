@@ -14,6 +14,7 @@ const TABLES = [
   { name: "messages", serviceRole: true },
   { name: "events", serviceRole: true },
   { name: "participants", serviceRole: true },
+  { name: "photobook_requests", serviceRole: true },
   { name: "rate_limits", serviceRole: false },
 ];
 for (const { name: table, serviceRole } of TABLES) {

@@ -23,12 +23,14 @@ async function all(table, columns) {
 const isDemo = (roomId) => roomId?.startsWith("DEMO");
 const keep = (roomId) => includeDemo || !isDemo(roomId);
 
-const [roomsAll, messagesAll, participantsAll, eventsAll] = await Promise.all([
+const [roomsAll, messagesAll, participantsAll, eventsAll, requests] = await Promise.all([
   all("rooms", "id, created_at, deadline, password_hash, template"),
   all("messages", "room_id, participant_id, photo_path"),
   all("participants", "id, room_id"),
   all("events", "name, source, room_id, created_at"),
+  all("photobook_requests", "source"), // 개인정보(이름·번호)는 읽지 않는다
 ]);
+const FREE_QUOTA = 200; // src/lib/photobook.ts 의 PHOTOBOOK_EVENT.freeQuota 와 맞출 것
 
 const rooms = roomsAll.filter((r) => keep(r.id));
 const roomIds = new Set(rooms.map((r) => r.id));
@@ -111,6 +113,16 @@ line("명단 외 작성 메시지", `${unlisted.length}개 (명단 방 메시지
 console.log("\n포토북 미리보기");
 line("클릭", `${interest.length}회 (결과 페이지 ${interest.filter((e) => e.source === "result").length} · 주최자 ${interest.filter((e) => e.source === "host").length})`);
 line("클릭이 있는 방", `${interestRooms.size}개 / ${rooms.length}개 (${pct(interestRooms.size, rooms.length)})`);
+
+// 구매 전환: 미리보기를 연 사람 중 실물 포토북을 신청한 비율 (신청은 방과 연결하지 않으므로 데모 구분 없음)
+const reqBy = (s) => requests.filter((r) => r.source === s).length;
+const viewsBy = (s) => interest.filter((e) => e.source === s).length;
+console.log("\n실물 포토북 신청 (선착순 무료 제작)");
+line("신청", `${requests.length}명 / 정원 ${FREE_QUOTA}명 (남은 자리 ${Math.max(0, FREE_QUOTA - requests.length)}명)`);
+line("전환율 (신청÷미리보기)", `${pct(requests.length, interest.length)}`);
+line("  결과 페이지에서", `${reqBy("result")}명 / 미리보기 ${viewsBy("result")}회 (${pct(reqBy("result"), viewsBy("result"))})`);
+line("  주최자 페이지에서", `${reqBy("host")}명 / 미리보기 ${viewsBy("host")}회 (${pct(reqBy("host"), viewsBy("host"))})`);
+line("  직접 방문", `${reqBy("direct")}명`);
 
 console.log("\n점검");
 line("사진 파일 누락", missingPhotos.length ? `✗ ${missingPhotos.length}개 (메시지는 있는데 파일이 없음)` : "✓ 없음");
