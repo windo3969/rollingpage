@@ -3,7 +3,7 @@
 const P = "/photobook-sample";
 
 // npm run make:sample-pdf 로 이 페이지를 인쇄해 만든 파일
-export const SAMPLE_PDF_PATH = `${P}/rollingpaper-photobook-sample.pdf`;
+export const SAMPLE_PDF_PATH = `${P}/rollingpage-photobook-sample.pdf`;
 
 export const SAMPLE = {
   recipient: "지민",

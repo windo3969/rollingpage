@@ -8,7 +8,7 @@ export function ogMetadata(title: string, description: string): Metadata {
     description,
     openGraph: {
       type: "website",
-      siteName: "Rolling Paper",
+      siteName: "rollingpage",
       locale: "ko_KR",
       title,
       description,

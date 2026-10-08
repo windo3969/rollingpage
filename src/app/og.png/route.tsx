@@ -56,7 +56,7 @@ export async function GET() {
         <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 0 0 90px", flex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", fontSize: 34, fontWeight: 600 }}>
             <Heart size={38} />
-            <span style={{ marginLeft: 10 }}>RollingPaper</span>
+            <span style={{ marginLeft: 10 }}>rollingpage</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", marginTop: 44, fontSize: 60, fontWeight: 700, lineHeight: 1.3, letterSpacing: -1.5 }}>
             {HEADLINE.map((line) => (

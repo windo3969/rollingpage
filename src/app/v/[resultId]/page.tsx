@@ -13,7 +13,7 @@ export async function generateMetadata(props: PageProps<"/v/[resultId]">): Promi
   // URL에 결과 ID가 들어 있고, 사진 signed URL도 있으므로 Referer를 싣지 않는다.
   const referrer = "no-referrer";
   const room = await getRoomByResultId((await props.params).resultId);
-  if (!room) return { title: "롤링페이퍼", referrer };
+  if (!room) return { title: "rollingpage", referrer };
   return {
     ...ogMetadata(`${room.recipient_name}님에게 롤링페이퍼가 도착했어요 ♡`, "친구들이 마음을 모아 만든 롤링페이퍼예요"),
     referrer,
@@ -65,7 +65,7 @@ export default async function ResultPage(props: PageProps<"/v/[resultId]">) {
         <footer className="mt-16 flex flex-col items-center gap-3">
           <p className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-muted">
             <HeartIcon size={16} className="text-rose" />
-            RollingPaper
+            rollingpage
           </p>
           <SearchSafeNotice />
         </footer>

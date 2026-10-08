@@ -6,7 +6,7 @@ import { existsSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 
 const url = process.argv[2] ?? "http://localhost:3000/photobook/sample";
-const out = resolve("public/photobook-sample/rollingpaper-photobook-sample.pdf");
+const out = resolve("public/photobook-sample/rollingpage-photobook-sample.pdf");
 
 const candidates = [
   "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",

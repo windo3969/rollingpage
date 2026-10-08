@@ -13,7 +13,7 @@ import { WriteForm } from "./WriteForm";
 
 export async function generateMetadata(props: PageProps<"/r/[id]">): Promise<Metadata> {
   const room = await getRoom((await props.params).id);
-  if (!room) return { title: "롤링페이퍼" };
+  if (!room) return { title: "rollingpage" };
   return ogMetadata(
     `${room.recipient_name}님에게 롤링페이퍼를 남겨주세요 ♡`,
     `${formatDeadline(room.deadline)}까지 작성할 수 있어요`,

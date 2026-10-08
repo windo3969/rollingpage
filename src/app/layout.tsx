@@ -9,7 +9,7 @@ import { siteUrl } from "@/lib/site";
 export const metadata: Metadata = {
   metadataBase: siteUrl(),
   // 링크 미리보기(카카오톡 등) 기본값. 방/결과 페이지는 page에서 제목·설명을 덮어쓴다.
-  ...ogMetadata("롤링페이퍼", "검색에 노출되지 않는 안전한 생일 롤링페이퍼"),
+  ...ogMetadata("rollingpage", "검색에 노출되지 않는 안전한 생일 롤링페이퍼"),
   // 모든 페이지 기본값: 검색엔진 차단. 공개 페이지만 page에서 indexableRobots로 덮어쓴다.
   robots: noIndexRobots,
 };

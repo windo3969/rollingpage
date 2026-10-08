@@ -5,7 +5,7 @@ export function Logo() {
   return (
     <Link href="/" className="inline-flex items-center gap-1.5 text-lg font-semibold tracking-tight text-ink">
       <HeartIcon size={22} className="text-rose" />
-      RollingPaper
+      rollingpage
     </Link>
   );
 }

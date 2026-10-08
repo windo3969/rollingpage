@@ -1,4 +1,6 @@
-# 롤링페이퍼
+# rollingpage
+
+검색에 노출되지 않는 안전한 생일 롤링페이퍼 서비스.
 
 기획·원칙은 [CLAUDE.md](CLAUDE.md) 참고.
 
