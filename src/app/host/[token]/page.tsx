@@ -51,7 +51,23 @@ export default async function HostPage(props: PageProps<"/host/[token]">) {
         <h1 className={pageTitle}>방 관리하기</h1>
         <p className="mt-2 text-sm text-ink-muted">링크를 공유하고, 모인 롤링페이퍼를 전달해보세요.</p>
 
-        <section className={`${card} mt-6`}>
+        {/* 주최자 링크는 잃어버리면 되찾을 수 없으므로 가장 먼저 보이게 둔다 */}
+        <section className="mt-6 rounded-2xl bg-pastel-yellow/70 p-5">
+          <h2 className="flex items-center gap-1.5 font-semibold">
+            <LockIcon size={18} />
+            주최자 전용 링크 — 꼭 저장해두세요
+          </h2>
+          <p className="mt-1 text-sm">
+            지금 보고 있는 이 페이지의 주소예요. 이 링크로만 롤링페이퍼를 관리할 수 있고, 잃어버리면 다시 찾을 수
+            없어요. 다른 사람에게는 공유하지 마세요.
+          </p>
+          <div className="mt-3 flex items-center gap-2">
+            <input readOnly value={hostUrl} className={linkField} />
+            <CopyButton text={hostUrl} />
+          </div>
+        </section>
+
+        <section className={`${card} mt-4`}>
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="text-xs text-ink-muted">{room.recipient_name}님에게</p>
@@ -158,18 +174,6 @@ export default async function HostPage(props: PageProps<"/host/[token]">) {
 
           <div className="mt-6 border-t border-line pt-5">
             <PdfInterestButton source="host" recordKey={token} />
-          </div>
-        </section>
-
-        <section className="mt-4 rounded-2xl bg-pastel-yellow/70 p-5">
-          <h2 className="font-semibold">주최자 전용 링크 — 꼭 저장해두세요</h2>
-          <p className="mt-1 text-sm">
-            지금 보고 있는 이 페이지의 주소예요. 이 링크로만 롤링페이퍼를 관리할 수 있고, 잃어버리면 다시 찾을 수
-            없어요. 다른 사람에게는 공유하지 마세요.
-          </p>
-          <div className="mt-3 flex items-center gap-2">
-            <input readOnly value={hostUrl} className={linkField} />
-            <CopyButton text={hostUrl} />
           </div>
         </section>
 

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Gaegu } from "next/font/google";
-import { AppHeader } from "@/components/AppHeader";
-import { buttonPrimary } from "@/components/ui";
+import { Logo } from "@/components/AppHeader";
+import { BackButton } from "@/components/BackButton";
+import { buttonPrimary, buttonSecondary } from "@/components/ui";
 import { ClosingPage, CoverPage, MessagePage, ThanksPage } from "./PhotobookPages";
 import { PhotobookViewer } from "./PhotobookViewer";
 import { SAMPLE, SAMPLE_PAGES, SAMPLE_PDF_PATH } from "./sampleData";
@@ -28,9 +29,11 @@ export default function PhotobookSamplePage() {
 
   return (
     <div className={`${bookHand.variable} flex flex-1 flex-col`}>
-      <div className="print:hidden">
-        <AppHeader />
-      </div>
+      {/* 결과·주최자 페이지에서 넘어오므로 돌아갈 수 있게 뒤로가기를 둔다 */}
+      <header className="mx-auto flex w-full max-w-md items-center justify-between px-5 pt-5 print:hidden">
+        <BackButton className="-ml-1.5 rounded-full py-1 pr-3 pl-1 text-sm font-medium text-ink active:bg-line" />
+        <Logo />
+      </header>
 
       <main className="w-full flex-1 py-8 print:p-0">
         <header className="mx-auto max-w-md px-5 print:hidden">
@@ -58,6 +61,7 @@ export default function PhotobookSamplePage() {
             샘플 PDF 다운로드 (무료)
           </a>
           <p className="mt-3 text-center text-xs text-ink-muted">A5 크기 · 인쇄해서 바로 쓸 수 있어요</p>
+          <BackButton className={`${buttonSecondary} mt-6 w-full`}>롤링페이퍼로 돌아가기</BackButton>
         </div>
       </main>
     </div>

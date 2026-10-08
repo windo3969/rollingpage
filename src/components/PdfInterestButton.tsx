@@ -10,7 +10,7 @@ export function PdfInterestButton({ source, recordKey }: { source: PdfInterestSo
   return (
     <div className="flex flex-col items-center gap-2">
       <Link
-        href="/photobook/sample"
+        href={`/photobook/sample?from=${source}`} // from: 미리보기의 뒤로가기가 이전 페이지로 돌아가게 하는 표시
         onClick={() => {
           recordPdfInterest(source, recordKey).catch(() => {});
         }}
