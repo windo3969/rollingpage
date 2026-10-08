@@ -87,6 +87,22 @@ export async function getParticipantStatuses(roomId: string): Promise<Participan
   });
 }
 
+export type UnlistedAuthor = { name: string; messageCount: number };
+
+// 주최자 대시보드 전용: 명단에서 이름을 고르지 않고("명단에 없어요") 쓴 작성자들. 같은 이름은 하나로 묶는다.
+export async function getUnlistedAuthors(roomId: string): Promise<UnlistedAuthor[]> {
+  const { data, error } = await createAdminClient()
+    .from("messages")
+    .select("author_name")
+    .eq("room_id", roomId)
+    .is("participant_id", null)
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  const counts = new Map<string, number>();
+  for (const { author_name } of data) counts.set(author_name, (counts.get(author_name) ?? 0) + 1);
+  return [...counts].map(([name, messageCount]) => ({ name, messageCount }));
+}
+
 export async function countMessages(roomId: string): Promise<number> {
   const { count, error } = await createAdminClient()
     .from("messages")

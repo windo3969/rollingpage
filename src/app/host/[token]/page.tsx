@@ -9,7 +9,7 @@ import { SearchSafeNotice } from "@/components/SearchSafeNotice";
 import { CalendarIcon, LockIcon, MessageIcon } from "@/components/icons";
 import { card, pageTitle } from "@/components/ui";
 import { formatDeadline } from "@/lib/format";
-import { countMessages, getParticipantStatuses, getRoomByHostToken, isClosed } from "@/lib/rooms";
+import { countMessages, getParticipantStatuses, getRoomByHostToken, getUnlistedAuthors, isClosed } from "@/lib/rooms";
 import { ParticipantManager } from "./ParticipantManager";
 import { ReminderCopy } from "./ReminderCopy";
 import { isTemplateId } from "@/lib/templates";
@@ -35,8 +35,11 @@ export default async function HostPage(props: PageProps<"/host/[token]">) {
   const room = await getRoomByHostToken(token);
   if (!room) notFound();
 
-  const [messageCount, participants] = await Promise.all([countMessages(room.id), getParticipantStatuses(room.id)]);
-  const unlistedCount = messageCount - participants.reduce((sum, p) => sum + p.messageCount, 0);
+  const [messageCount, participants, unlistedAuthors] = await Promise.all([
+    countMessages(room.id),
+    getParticipantStatuses(room.id),
+    getUnlistedAuthors(room.id),
+  ]);
   const pendingNames = participants.filter((p) => !p.written).map((p) => p.name);
   const closed = isClosed(room);
   const base = await origin();
@@ -127,10 +130,10 @@ export default async function HostPage(props: PageProps<"/host/[token]">) {
           </h2>
           <p className="mt-1 text-sm text-ink-muted">
             {participants.length > 0
-              ? "명단에서 이름을 고르고 쓴 사람은 작성 완료로 표시돼요. 이 현황은 주최자만 볼 수 있어요."
+              ? "명단에서 이름을 고르고 쓴 사람은 작성 완료, 명단에 없는 이름으로 쓴 사람은 명단 외로 표시돼요. 이 현황은 주최자만 볼 수 있어요."
               : "메시지를 받을 친구들의 이름을 넣어두면, 누가 썼고 누가 안 썼는지 확인할 수 있어요."}
           </p>
-          <ParticipantManager token={token} participants={participants} unlistedCount={unlistedCount} />
+          <ParticipantManager token={token} participants={participants} unlistedAuthors={unlistedAuthors} />
           {!closed && pendingNames.length > 0 && (
             <ReminderCopy
               pendingNames={pendingNames}

@@ -3,20 +3,21 @@
 import { useActionState, useState, useTransition } from "react";
 import { buttonSmall, errorBox, hint, input } from "@/components/ui";
 import { PARTICIPANT_MAX } from "@/lib/limits";
-import type { ParticipantStatus } from "@/lib/rooms";
+import type { ParticipantStatus, UnlistedAuthor } from "@/lib/rooms";
 import { addParticipants, removeParticipant, type AddParticipantsState } from "./actions";
 
 type Filter = "all" | "written" | "pending";
 
 // 주최자 대시보드: 참여자별 작성 현황 + 명단 추가/삭제
+// 명단에서 이름을 고르지 않고 쓴 사람(unlistedAuthors)도 "명단 외"로 함께 보여준다.
 export function ParticipantManager({
   token,
   participants,
-  unlistedCount,
+  unlistedAuthors,
 }: {
   token: string;
   participants: ParticipantStatus[];
-  unlistedCount: number; // 명단에 없는 사람이 쓴 메시지 수
+  unlistedAuthors: UnlistedAuthor[];
 }) {
   const [state, formAction, pending] = useActionState<AddParticipantsState, FormData>(
     addParticipants.bind(null, token),
@@ -25,12 +26,16 @@ export function ParticipantManager({
   const [removing, startRemove] = useTransition();
   const [filter, setFilter] = useState<Filter>("all");
 
+  const hasList = participants.length > 0;
   const writtenCount = participants.filter((p) => p.written).length;
   const pendingCount = participants.length - writtenCount;
-  const percent = participants.length ? Math.round((writtenCount / participants.length) * 100) : 0;
+  // 진행률은 주최자가 등록한 명단 기준 (명단 외 작성자를 넣으면 100%를 넘을 수 있으므로)
+  const percent = hasList ? Math.round((writtenCount / participants.length) * 100) : 0;
   const visible = participants.filter((p) =>
     filter === "all" ? true : filter === "written" ? p.written : !p.written,
   );
+  // 명단 외 작성자는 모두 "작성 완료"이므로 미작성 탭에서는 빠진다
+  const visibleUnlisted = filter === "pending" ? [] : unlistedAuthors;
 
   function remove(participant: ParticipantStatus) {
     const note = participant.written ? "\n이미 쓴 메시지는 그대로 남아요." : "";
@@ -39,40 +44,49 @@ export function ParticipantManager({
   }
 
   const tabs: { id: Filter; label: string; count: number }[] = [
-    { id: "all", label: "전체", count: participants.length },
-    { id: "written", label: "작성 완료", count: writtenCount },
+    { id: "all", label: "전체", count: participants.length + unlistedAuthors.length },
+    { id: "written", label: "작성 완료", count: writtenCount + unlistedAuthors.length },
     { id: "pending", label: "미작성", count: pendingCount },
   ];
 
+  const emptyText =
+    filter === "written"
+      ? "아직 작성한 사람이 없어요."
+      : filter === "pending" && !hasList
+        ? "명단을 등록하면 아직 안 쓴 사람을 확인할 수 있어요."
+        : "모두 작성했어요!";
+
   return (
     <div className="mt-4">
-      {participants.length > 0 && (
+      {(hasList || unlistedAuthors.length > 0) && (
         <>
-          {/* 진행률 */}
-          <div>
-            <div
-              className="h-2 overflow-hidden rounded-full bg-line"
-              role="progressbar"
-              aria-valuenow={percent}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label="작성 진행률"
-            >
-              <div className="h-full rounded-full bg-mint transition-[width]" style={{ width: `${percent}%` }} />
+          {/* 진행률 (명단이 있을 때만) */}
+          {hasList && (
+            <div className="mb-4">
+              <div
+                className="h-2 overflow-hidden rounded-full bg-line"
+                role="progressbar"
+                aria-valuenow={percent}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="작성 진행률"
+              >
+                <div className="h-full rounded-full bg-mint transition-[width]" style={{ width: `${percent}%` }} />
+              </div>
+              <p className="mt-2 text-right text-xs text-ink-muted">
+                <strong className="font-semibold text-ink">
+                  {writtenCount} / {participants.length}명
+                </strong>{" "}
+                작성 완료
+              </p>
+              {unlistedAuthors.length > 0 && (
+                <p className="mt-1 text-right text-xs text-ink-muted">명단 외 작성자 {unlistedAuthors.length}명</p>
+              )}
             </div>
-            <p className="mt-2 text-right text-xs text-ink-muted">
-              <strong className="font-semibold text-ink">
-                {writtenCount} / {participants.length}명
-              </strong>{" "}
-              작성 완료
-            </p>
-            {unlistedCount > 0 && (
-              <p className="mt-1 text-right text-xs text-ink-muted">명단에 없는 사람이 쓴 메시지 {unlistedCount}개</p>
-            )}
-          </div>
+          )}
 
           {/* 필터 탭 */}
-          <div className="mt-4 grid grid-cols-3 gap-1 rounded-full bg-cream p-1" role="tablist" aria-label="작성 여부로 보기">
+          <div className="grid grid-cols-3 gap-1 rounded-full bg-cream p-1" role="tablist" aria-label="작성 여부로 보기">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -115,10 +129,26 @@ export function ParticipantManager({
                 </button>
               </li>
             ))}
-            {visible.length === 0 && (
-              <li className="py-6 text-center text-sm text-ink-muted">
-                {filter === "written" ? "아직 작성한 사람이 없어요." : "모두 작성했어요!"}
+            {visibleUnlisted.map((author) => (
+              <li key={`unlisted-${author.name}`} className="flex items-center gap-3 py-2.5">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-pastel-lavender text-xs font-semibold text-[#7b6fc0]">
+                  {author.name.slice(0, 1)}
+                </span>
+                <span className="min-w-0 flex-1 truncate text-sm">
+                  {author.name}
+                  {author.messageCount > 1 && (
+                    <span className="ml-1 text-xs text-ink-muted">· {author.messageCount}개</span>
+                  )}
+                </span>
+                <span className="shrink-0 rounded-full bg-pastel-lavender px-2.5 py-0.5 text-xs font-medium text-[#7b6fc0]">
+                  명단 외
+                </span>
+                {/* 삭제 버튼 자리 (명단 외 작성자는 명단에서 뺄 것이 없으므로 비워 둔다) */}
+                <span className="size-7 shrink-0" aria-hidden />
               </li>
+            ))}
+            {visible.length + visibleUnlisted.length === 0 && (
+              <li className="py-6 text-center text-sm text-ink-muted">{emptyText}</li>
             )}
           </ul>
         </>
