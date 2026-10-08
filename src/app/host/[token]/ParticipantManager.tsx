@@ -9,7 +9,7 @@ import { addParticipants, removeParticipant, type AddParticipantsState } from ".
 type Filter = "all" | "written" | "pending";
 
 // 주최자 대시보드: 참여자별 작성 현황 + 명단 추가/삭제
-// 명단에서 이름을 고르지 않고 쓴 사람(unlistedAuthors)도 "명단 외"로 함께 보여준다.
+// 명단에서 이름을 고르지 않고 쓴 사람(unlistedAuthors)도 작성 완료로 함께 보여준다.
 export function ParticipantManager({
   token,
   participants,
@@ -79,9 +79,6 @@ export function ParticipantManager({
                 </strong>{" "}
                 작성 완료
               </p>
-              {unlistedAuthors.length > 0 && (
-                <p className="mt-1 text-right text-xs text-ink-muted">명단 외 작성자 {unlistedAuthors.length}명</p>
-              )}
             </div>
           )}
 
@@ -129,9 +126,10 @@ export function ParticipantManager({
                 </button>
               </li>
             ))}
+            {/* 명단에 없는 이름으로 쓴 사람도 다른 작성자와 똑같이 "작성 완료"로 보여준다 */}
             {visibleUnlisted.map((author) => (
               <li key={`unlisted-${author.name}`} className="flex items-center gap-3 py-2.5">
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-pastel-lavender text-xs font-semibold text-[#7b6fc0]">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-pastel-pink text-xs font-semibold text-rose-deep">
                   {author.name.slice(0, 1)}
                 </span>
                 <span className="min-w-0 flex-1 truncate text-sm">
@@ -140,10 +138,10 @@ export function ParticipantManager({
                     <span className="ml-1 text-xs text-ink-muted">· {author.messageCount}개</span>
                   )}
                 </span>
-                <span className="shrink-0 rounded-full bg-pastel-lavender px-2.5 py-0.5 text-xs font-medium text-[#7b6fc0]">
-                  명단 외
+                <span className="shrink-0 rounded-full bg-pastel-mint px-2.5 py-0.5 text-xs font-medium text-mint">
+                  작성 완료
                 </span>
-                {/* 삭제 버튼 자리 (명단 외 작성자는 명단에서 뺄 것이 없으므로 비워 둔다) */}
+                {/* 삭제 버튼 자리 (명단에 없는 사람이라 뺄 것이 없으므로 비워 둔다) */}
                 <span className="size-7 shrink-0" aria-hidden />
               </li>
             ))}

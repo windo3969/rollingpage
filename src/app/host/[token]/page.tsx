@@ -130,7 +130,7 @@ export default async function HostPage(props: PageProps<"/host/[token]">) {
           </h2>
           <p className="mt-1 text-sm text-ink-muted">
             {participants.length > 0
-              ? "명단에서 이름을 고르고 쓴 사람은 작성 완료, 명단에 없는 이름으로 쓴 사람은 명단 외로 표시돼요. 이 현황은 주최자만 볼 수 있어요."
+              ? "누가 썼고 누가 안 썼는지 확인할 수 있어요. 명단에 없는 이름으로 쓴 사람도 함께 보여요. 이 현황은 주최자만 볼 수 있어요."
               : "메시지를 받을 친구들의 이름을 넣어두면, 누가 썼고 누가 안 썼는지 확인할 수 있어요."}
           </p>
           <ParticipantManager token={token} participants={participants} unlistedAuthors={unlistedAuthors} />
