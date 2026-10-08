@@ -22,10 +22,10 @@ export function RequestForm({ source, remaining }: { source: PhotobookSource; re
       </span>
       <h2 className="mt-3 flex items-center gap-1.5 text-lg font-bold tracking-tight">
         <BookIcon size={20} className="text-rose" />
-        실물 포토북으로 받아보세요
+        실물 포토 소책자로 받아보세요
       </h2>
       <p className="mt-1 text-sm leading-relaxed text-ink-muted">
-        친구들의 메시지와 사진을 담은 소책자 포토북을 만들어 보내드려요.
+        안녕하세요, 개발자입니다. 작성하신 소중한 사진과 글들을 소책자로 만들어서 드리겠습니다^^
       </p>
 
       <p className="mt-4 flex items-baseline gap-2">
@@ -106,7 +106,7 @@ export function RequestForm({ source, remaining }: { source: PhotobookSource; re
           )}
 
           <button type="submit" disabled={pending} className={`${buttonPrimary} w-full`}>
-            {pending ? "신청하는 중…" : "무료로 신청하기"}
+            {pending ? "주문하는 중…" : "주문하기"}
           </button>
         </form>
       )}
