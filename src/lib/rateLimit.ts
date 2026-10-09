@@ -10,6 +10,7 @@ const LIMITS = {
   unlockPerRoom: { limit: 30, windowSeconds: 15 * 60 }, // 방 전체 15분에 비밀번호 30회 (분산 대입 방지)
   submitMessage: { limit: 20, windowSeconds: 10 * 60 }, // IP·방당 10분에 메시지 20개
   photobookRequest: { limit: 5, windowSeconds: 60 * 60 }, // IP당 시간당 포토북 신청 5회 (선착순 자리 독점 방지)
+  feedback: { limit: 10, windowSeconds: 60 * 60 }, // IP당 시간당 피드백 10개 (도배 방지)
 } as const;
 
 type Bucket = keyof typeof LIMITS;

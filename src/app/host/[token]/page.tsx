@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { CopyButton } from "@/components/CopyButton";
+import { FeedbackButton } from "@/components/FeedbackButton";
 import { KakaoShareButton } from "@/components/KakaoShareButton";
 import { PdfInterestButton } from "@/components/PdfInterestButton";
 import { SearchSafeNotice } from "@/components/SearchSafeNotice";
@@ -180,8 +181,9 @@ export default async function HostPage(props: PageProps<"/host/[token]">) {
           </div>
         </section>
 
-        <div className="mt-8">
+        <div className="mt-8 flex flex-col items-center gap-3">
           <SearchSafeNotice />
+          <FeedbackButton page="host" />
         </div>
       </main>
     </>

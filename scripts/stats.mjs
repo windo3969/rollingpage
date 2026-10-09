@@ -23,12 +23,13 @@ async function all(table, columns) {
 const isDemo = (roomId) => roomId?.startsWith("DEMO");
 const keep = (roomId) => includeDemo || !isDemo(roomId);
 
-const [roomsAll, messagesAll, participantsAll, eventsAll, requests] = await Promise.all([
+const [roomsAll, messagesAll, participantsAll, eventsAll, requests, feedback] = await Promise.all([
   all("rooms", "id, created_at, deadline, password_hash, template"),
   all("messages", "room_id, participant_id, photo_path"),
   all("participants", "id, room_id"),
   all("events", "name, source, room_id, created_at"),
   all("photobook_requests", "source, followup_consented_at"), // 개인정보(이름·번호)는 읽지 않는다
+  all("feedback", "page, rating, message"),
 ]);
 const FREE_QUOTA = 200; // src/lib/photobook.ts 의 PHOTOBOOK_EVENT.freeQuota 와 맞출 것
 
@@ -125,6 +126,15 @@ line("  주최자 페이지에서", `${reqBy("host")}명 / 미리보기 ${viewsB
 line("  직접 방문", `${reqBy("direct")}명`);
 const followups = requests.filter((r) => r.followup_consented_at).length;
 line("후기·구매 연락 동의", `${followups}명 (${pct(followups, requests.length)})`);
+
+// 익명 피드백 (내용은 npm run feedback 으로 본다)
+const fbRating = (r) => feedback.filter((f) => f.rating === r).length;
+const fbPage = (p) => feedback.filter((f) => f.page === p).length;
+const rated = feedback.filter((f) => f.rating).length;
+console.log("\n익명 피드백");
+line("전체", `${feedback.length}개 (의견 글 ${feedback.filter((f) => f.message).length}개)`);
+line("평가", `좋았어요 ${pct(fbRating("good"), rated)} · 보통 ${pct(fbRating("okay"), rated)} · 아쉬워요 ${pct(fbRating("bad"), rated)}`);
+line("화면별", `작성 완료 ${fbPage("write")} · 결과 ${fbPage("result")} · 주최자 ${fbPage("host")}`);
 
 console.log("\n점검");
 line("사진 파일 누락", missingPhotos.length ? `✗ ${missingPhotos.length}개 (메시지는 있는데 파일이 없음)` : "✓ 없음");

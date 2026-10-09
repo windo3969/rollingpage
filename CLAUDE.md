@@ -37,6 +37,7 @@
 | 글감 힌트 | 관계 기반 질문형 프롬프트 (예: "이 사람과 있었던 재밌는 에피소드는?"). AI 생성 문장 아님 |
 | 자동 레이아웃 | 글자 수에 따라 카드 크기 자동 조정, 결과물이 항상 정돈되어 보이게 |
 | 주최자 대시보드 | 참여자 명단 기반 작성/미작성 현황, 미작성자 리마인드 |
+| 익명 피드백 | 작성 완료·결과·주최자 화면의 "개발자에게 의견 보내기". 평가(좋았어요/보통/아쉬워요) + 자유 의견. 화면 종류만 저장 (이름·연락처·IP·방 주소 저장 안 함). 보기: `npm run feedback` |
 | 포토북 PDF | 사진 + 메시지를 자동 조합한 A5 포토북 PDF. **무료** (2026-09-25 결정: PDF에 돈을 내지는 않을 것으로 판단). 샘플: `/photobook/sample` |
 
 ### 유료
@@ -147,6 +148,13 @@ photobook_requests    -- 실물 포토북 무료 제작 신청 (개인정보: �
   source          text  (result | host | direct — 미리보기를 연 곳)
   consented_at    timestamptz (개인정보 수집·이용 동의 시각, 필수)
   followup_consented_at timestamptz nullable (후기·추가 구매 안내 연락 선택 동의 시각. null이면 연락 금지)
+  created_at      timestamptz
+
+feedback              -- 익명 피드백 (누가·어느 방에서 보냈는지 저장하지 않음)
+  id              uuid  PK
+  page            text  (write | result | host — 화면 종류만)
+  rating          text  nullable (good | okay | bad)
+  message         text  nullable (1~1000자, 평가·의견 중 하나 이상 필수)
   created_at      timestamptz
 ```
 

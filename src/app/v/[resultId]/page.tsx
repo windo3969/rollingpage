@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { FeedbackButton } from "@/components/FeedbackButton";
 import { HeartIcon } from "@/components/icons";
 import { MessageCard } from "@/components/MessageCard";
 import { PdfInterestButton } from "@/components/PdfInterestButton";
@@ -68,6 +69,7 @@ export default async function ResultPage(props: PageProps<"/v/[resultId]">) {
             rollingpage
           </p>
           <SearchSafeNotice />
+          <FeedbackButton page="result" />
         </footer>
       </main>
     </div>

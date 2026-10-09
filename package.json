@@ -14,7 +14,8 @@
     "stats:pdf": "node --env-file=.env.local scripts/stats-pdf.mjs",
     "make:sample-pdf": "node scripts/make-sample-pdf.mjs",
     "stats": "node --env-file=.env.local scripts/stats.mjs",
-    "photobook:requests": "node --env-file=.env.local scripts/photobook-requests.mjs"
+    "photobook:requests": "node --env-file=.env.local scripts/photobook-requests.mjs",
+    "feedback": "node --env-file=.env.local scripts/feedback.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.1",

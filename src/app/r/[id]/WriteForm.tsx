@@ -2,6 +2,7 @@
 
 import imageCompression from "browser-image-compression";
 import { useActionState, useEffect, useState } from "react";
+import { FeedbackButton } from "@/components/FeedbackButton";
 import { HeartIcon, ImageIcon, LockIcon } from "@/components/icons";
 import { MessageCard } from "@/components/MessageCard";
 import { buttonPrimary, buttonSecondary, errorBox, hint, input, label } from "@/components/ui";
@@ -115,6 +116,9 @@ export function WriteForm({
         <button type="button" onClick={writeAgain} className={`${buttonSecondary} mt-6 w-full`}>
           하나 더 쓰기
         </button>
+        <div className="mt-5">
+          <FeedbackButton page="write" />
+        </div>
       </div>
     );
   }
