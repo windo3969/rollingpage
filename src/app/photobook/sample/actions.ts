@@ -35,6 +35,8 @@ export async function requestPhotobook(_prev: RequestState, formData: FormData):
       phone,
       source: isPhotobookSource(rawSource) ? rawSource : "direct",
       consented_at: new Date().toISOString(),
+      // 선택 동의: 체크하지 않으면 null → 후기·추가 구매 안내 연락 대상이 아니다
+      followup_consented_at: formData.get("followup") === "on" ? new Date().toISOString() : null,
     });
 
   if (error) {

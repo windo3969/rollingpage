@@ -28,7 +28,7 @@ const [roomsAll, messagesAll, participantsAll, eventsAll, requests] = await Prom
   all("messages", "room_id, participant_id, photo_path"),
   all("participants", "id, room_id"),
   all("events", "name, source, room_id, created_at"),
-  all("photobook_requests", "source"), // 개인정보(이름·번호)는 읽지 않는다
+  all("photobook_requests", "source, followup_consented_at"), // 개인정보(이름·번호)는 읽지 않는다
 ]);
 const FREE_QUOTA = 200; // src/lib/photobook.ts 의 PHOTOBOOK_EVENT.freeQuota 와 맞출 것
 
@@ -123,6 +123,8 @@ line("전환율 (신청÷미리보기)", `${pct(requests.length, interest.length
 line("  결과 페이지에서", `${reqBy("result")}명 / 미리보기 ${viewsBy("result")}회 (${pct(reqBy("result"), viewsBy("result"))})`);
 line("  주최자 페이지에서", `${reqBy("host")}명 / 미리보기 ${viewsBy("host")}회 (${pct(reqBy("host"), viewsBy("host"))})`);
 line("  직접 방문", `${reqBy("direct")}명`);
+const followups = requests.filter((r) => r.followup_consented_at).length;
+line("후기·구매 연락 동의", `${followups}명 (${pct(followups, requests.length)})`);
 
 console.log("\n점검");
 line("사진 파일 누락", missingPhotos.length ? `✗ ${missingPhotos.length}개 (메시지는 있는데 파일이 없음)` : "✓ 없음");

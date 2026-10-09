@@ -18,7 +18,7 @@ if (process.argv.includes("--purge")) {
 
 const { data, error } = await admin
   .from("photobook_requests")
-  .select("name, phone, source, created_at")
+  .select("name, phone, source, created_at, followup_consented_at")
   .order("created_at", { ascending: true });
 if (error) throw error;
 
@@ -26,5 +26,11 @@ const SOURCE = { result: "결과 페이지", host: "주최자 페이지", direct
 const phone = (p) => p.replace(/^(\d{3})(\d{3,4})(\d{4})$/, "$1-$2-$3");
 const when = (s) => new Date(s).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
 
-console.log(`실물 포토북 신청 ${data.length}명\n`);
-data.forEach((r, i) => console.log(`${String(i + 1).padStart(3)}. ${r.name}  ${phone(r.phone)}  (${SOURCE[r.source]}, ${when(r.created_at)})`));
+const followups = data.filter((r) => r.followup_consented_at).length;
+console.log(`실물 포토북 신청 ${data.length}명 (후기·추가 구매 연락 동의 ${followups}명)\n`);
+// "배송 연락만"인 사람에게는 제작·배송 연락만 한다 (후기 요청, 유료 구매 안내 금지)
+data.forEach((r, i) =>
+  console.log(
+    `${String(i + 1).padStart(3)}. ${r.name}  ${phone(r.phone)}  [${r.followup_consented_at ? "후기·구매 연락 가능" : "배송 연락만"}]  (${SOURCE[r.source]}, ${when(r.created_at)})`,
+  ),
+);

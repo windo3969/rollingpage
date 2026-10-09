@@ -94,7 +94,22 @@ export function RequestForm({ source, remaining }: { source: PhotobookSource; re
                 <li>이용 목적: 무료 포토북 제작 안내 및 배송지 확인 연락</li>
                 <li>보유 기간: 이벤트 종료 시까지 (종료 후 지체 없이 파기)</li>
                 <li>동의를 거부할 수 있으며, 거부하시면 신청이 제한됩니다.</li>
-                <li>광고·홍보 목적으로는 사용하지 않습니다.</li>
+                <li>아래 선택 항목에 동의하지 않으시면 광고·홍보 목적으로는 연락하지 않습니다.</li>
+              </ul>
+            </details>
+
+            {/* 선택 동의: 후기·추가 구매 안내는 광고성 연락이므로 필수 동의와 분리해 따로 받는다 */}
+            <label className="mt-3 flex items-start gap-2 border-t border-line pt-3 text-sm text-ink">
+              <input type="checkbox" name="followup" className="mt-0.5 size-4 shrink-0 accent-rose" />
+              <span>소책자를 받은 뒤 후기 요청 및 추가 구매 안내 연락에 동의합니다 (선택)</span>
+            </label>
+            <details className="mt-2">
+              <summary className="cursor-pointer">자세히 보기</summary>
+              <ul className="mt-2 flex list-disc flex-col gap-1 pl-4">
+                <li>이용 항목: 이름(닉네임), 휴대폰 번호</li>
+                <li>이용 목적: 소책자 수령 후 후기 요청, 추가 구매(유료) 안내 연락</li>
+                <li>보유 기간: 이벤트 종료 시까지 (종료 후 지체 없이 파기)</li>
+                <li>동의하지 않아도 무료 신청에는 영향이 없습니다.</li>
               </ul>
             </details>
           </div>
