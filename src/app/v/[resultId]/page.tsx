@@ -59,7 +59,7 @@ export default async function ResultPage(props: PageProps<"/v/[resultId]">) {
 
         {messages.length > 0 && (
           <div className="mt-14">
-            <PdfInterestButton source="result" recordKey={room.result_id} />
+            <PdfInterestButton source="result" recordKey={room.result_id} resultId={room.result_id} />
           </div>
         )}
 

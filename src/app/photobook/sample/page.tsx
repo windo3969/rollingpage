@@ -14,7 +14,11 @@ import "./print.css";
 export const metadata: Metadata = {
   title: "포토북 미리보기",
   description: "친구들의 메시지와 사진으로 만든 생일 포토북 샘플",
+  // 주소에 결과 ID(r)가 들어갈 수 있으므로 외부로 나가는 요청에 Referer를 싣지 않는다
+  referrer: "no-referrer",
 };
+
+const RESULT_ID_PATTERN = /^[a-f0-9]{32}$/;
 
 // 포토북 전용 손글씨 (사이트 나머지는 Pretendard). 이 페이지에서만 불러온다.
 const bookHand = Gaegu({ weight: ["400", "700"], variable: "--font-book-hand", preload: false });
@@ -24,8 +28,10 @@ const FIRST_MESSAGE_PAGE = 3;
 
 export default async function PhotobookSamplePage(props: PageProps<"/photobook/sample">) {
   // 어디서 미리보기를 열었는지 (전환율을 결과/주최자 페이지별로 보기 위해)
-  const from = (await props.searchParams).from;
+  const { from, r } = await props.searchParams;
   const source: PhotobookSource = typeof from === "string" && isPhotobookSource(from) ? from : "direct";
+  // 어느 롤링페이퍼로 PDF를 만들지 (형식이 맞을 때만 넘긴다. 실제 방 확인은 신청할 때 서버에서)
+  const resultId = typeof r === "string" && RESULT_ID_PATTERN.test(r) ? r : null;
   const remaining = Math.max(0, PHOTOBOOK_EVENT.freeQuota - (await countPhotobookRequests()));
 
   const thanks = SAMPLE_PAGES.flatMap((page, i) => {
@@ -65,7 +71,7 @@ export default async function PhotobookSamplePage(props: PageProps<"/photobook/s
         </div>
 
         <div className="mx-auto mt-8 max-w-md px-5 print:hidden">
-          <RequestForm source={source} remaining={remaining} />
+          <RequestForm source={source} resultId={resultId} remaining={remaining} />
           <BackButton className={`${buttonSecondary} mt-6 w-full`}>롤링페이퍼로 돌아가기</BackButton>
         </div>
       </main>

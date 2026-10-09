@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { isPhotobookSource, normalizePhone, PHOTOBOOK_EVENT } from "@/lib/photobook";
 import { countPhotobookRequests } from "@/lib/photobookRequests";
 import { checkRateLimit, RATE_LIMIT_MESSAGE } from "@/lib/rateLimit";
+import { getRoomByResultId } from "@/lib/rooms";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type RequestState = {
@@ -26,21 +27,27 @@ export async function requestPhotobook(_prev: RequestState, formData: FormData):
   if (!(await checkRateLimit("photobookRequest"))) return { error: RATE_LIMIT_MESSAGE, values };
 
   if ((await countPhotobookRequests()) >= PHOTOBOOK_EVENT.freeQuota)
-    return { error: "아쉽지만 선착순 무료 제작이 마감되었어요.", values };
+    return { error: "아쉽지만 선착순 무료 신청이 마감되었어요.", values };
 
+  // 어느 롤링페이퍼로 PDF를 만들지: 결과 ID로 방을 찾아 room_id만 저장한다 (없거나 잘못된 ID면 연결 없이 신청)
+  const resultId = String(formData.get("resultId") ?? "");
+  const room = resultId ? await getRoomByResultId(resultId) : null;
+
+  const now = new Date().toISOString();
   const { error } = await createAdminClient()
     .from("photobook_requests")
     .insert({
       name,
       phone,
       source: isPhotobookSource(rawSource) ? rawSource : "direct",
-      consented_at: new Date().toISOString(),
-      // 선택 동의: 체크하지 않으면 null → 후기·추가 구매 안내 연락 대상이 아니다
-      followup_consented_at: formData.get("followup") === "on" ? new Date().toISOString() : null,
+      room_id: room?.id ?? null,
+      consented_at: now,
+      // 선택 동의(광고성 정보 수신): 체크하지 않으면 null → 실물 상품 안내 연락 대상이 아니다
+      marketing_consented_at: formData.get("marketing") === "on" ? now : null,
     });
 
   if (error) {
-    if (error.code === "23505") return { error: "이미 신청된 번호예요. 곧 연락드릴게요!", values }; // unique 위반
+    if (error.code === "23505") return { error: "이미 신청된 번호예요. PDF가 준비되면 보내드릴게요!", values }; // unique 위반
     console.error("requestPhotobook failed", error);
     return { error: "신청하지 못했어요. 잠시 후 다시 시도해주세요.", values };
   }

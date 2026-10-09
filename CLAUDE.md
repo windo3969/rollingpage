@@ -45,14 +45,17 @@
 |---|---|
 | 실물 포토북 제작 | **주 수익원.** 무료 PDF와 같은 레이아웃을 인쇄·제본한 소책자를 배송. 예상가 **5,000원** |
 
-**실물 포토북 무료 제작 이벤트 (구매 전환 측정)**: 포토북 미리보기(`/photobook/sample`)에서 선착순 200명 무료 신청을 받는다.
-- 받는 정보: 이름(닉네임), 휴대폰 번호, 개인정보 수집·이용 동의만. 주소는 연락할 때 따로 받는다
+**포토북 소책자 PDF 무료 신청 이벤트 (2026-10-09 변경: 실물 무료 제작 → PDF 무료 제공)**: 포토북 미리보기(`/photobook/sample`)에서 선착순 200명 신청을 받고, 신청자의 롤링페이퍼로 PDF를 만들어 보낸 뒤 실물 소책자 구매로 연결한다.
+- 받는 정보: 이름(닉네임), 휴대폰 번호, 동의. 신청은 미리보기를 연 방(`room_id`, 결과 ID로 연결)과 함께 저장한다
+- 동의 2단계
+  - 필수: PDF 전달, 수령 확인 및 **후기 요청** 연락 (안내 문구: "감사합니다, 후기를 여쭤볼게요")
+  - 선택: **실물 소책자 할인 소식 받기** (광고성 정보, `marketing_consented_at`). 선택 동의자에게만 실물 사진과 함께 구매를 권하는 연락을 한다
+- 실물 구매 유도 (A+B): A. 보내는 PDF 마지막 페이지에 실물 소책자 사진·가격·주문 QR (동의 불필요) / B. 선택 동의자에게 직접 안내
+- 필수 동의만으로는 상품 홍보·판매 권유 연락을 하지 않는다 (PDF 전달 메시지에 광고를 섞는 것도 금지)
 - 보관: 이벤트 종료 시까지 → 종료 후 `npm run photobook:requests -- --purge`로 파기
-- 동의 2단계: 필수(제작 안내·배송지 확인 연락) + **선택**(수령 후 후기 요청·추가 구매 안내). 선택 동의자(`followup_consented_at`)에게만 후기·유료 구매 연락을 한다. 나머지는 배송 연락만
-- 유료 전환 검증: 샘플 발송 후 "한 권 더 5,000원" 추가 구매 제안 (선택 동의자 연락 + 상자 동봉 카드)
-- 남은 자리는 실제 신청 수로 계산해 표시한다 (임의의 숫자 표시 금지)
-- 지표: `npm run stats`의 전환율(신청 ÷ 미리보기). 신청자 목록: `npm run photobook:requests`
-- 정원·가격은 `src/lib/photobook.ts`
+- 남은 자리는 실제 신청 수로 계산해 표시한다 (임의의 숫자·가짜 할인가 표시 금지)
+- 지표: `npm run stats`의 전환율(신청 ÷ 미리보기). 신청자 목록(롤링페이퍼 링크 포함): `npm run photobook:requests`
+- 정원·실물 가격은 `src/lib/photobook.ts`
 | 프리미엄 템플릿 | 추가 디자인 템플릿 |
 
 ### 명시적으로 제외한 것 (MVP 범위 밖)
@@ -141,13 +144,14 @@ events                -- 수요 검증용 (IP·기기·URL은 저장하지 않�
   room_id         text  nullable FK → rooms.id (방 삭제 시 null)
   created_at      timestamptz
 
-photobook_requests    -- 실물 포토북 무료 제작 신청 (개인정보: 이벤트 종료 시 파기)
+photobook_requests    -- 포토북 소책자 PDF 무료 신청 (개인정보: 이벤트 종료 시 파기)
   id              uuid  PK
   name            text  (이름 또는 닉네임)
   phone           text  unique (숫자만, 01012345678)
   source          text  (result | host | direct — 미리보기를 연 곳)
-  consented_at    timestamptz (개인정보 수집·이용 동의 시각, 필수)
-  followup_consented_at timestamptz nullable (후기·추가 구매 안내 연락 선택 동의 시각. null이면 연락 금지)
+  room_id         text  nullable FK → rooms.id (PDF를 만들 롤링페이퍼, 방 삭제 시 null)
+  consented_at    timestamptz (필수 동의: PDF 전달, 수령 확인 및 후기 요청 연락)
+  marketing_consented_at timestamptz nullable (선택 동의: 실물 소책자 할인 소식. null이면 상품 안내 연락 금지)
   created_at      timestamptz
 
 feedback              -- 익명 피드백 (누가·어느 방에서 보냈는지 저장하지 않음)

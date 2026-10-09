@@ -18,19 +18,23 @@ if (process.argv.includes("--purge")) {
 
 const { data, error } = await admin
   .from("photobook_requests")
-  .select("name, phone, source, created_at, followup_consented_at")
+  .select("name, phone, source, created_at, marketing_consented_at, rooms(result_id)")
   .order("created_at", { ascending: true });
 if (error) throw error;
 
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://rollingpage.vercel.app";
 const SOURCE = { result: "결과 페이지", host: "주최자 페이지", direct: "직접 방문" };
 const phone = (p) => p.replace(/^(\d{3})(\d{3,4})(\d{4})$/, "$1-$2-$3");
 const when = (s) => new Date(s).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
 
-const followups = data.filter((r) => r.followup_consented_at).length;
-console.log(`실물 포토북 신청 ${data.length}명 (후기·추가 구매 연락 동의 ${followups}명)\n`);
-// "배송 연락만"인 사람에게는 제작·배송 연락만 한다 (후기 요청, 유료 구매 안내 금지)
-data.forEach((r, i) =>
+const marketing = data.filter((r) => r.marketing_consented_at).length;
+console.log(`포토북 PDF 신청 ${data.length}명 (실물 할인 소식 동의 ${marketing}명)\n`);
+// 모두에게: PDF 전달, 수령 확인, 후기 요청 연락 가능 (필수 동의)
+// "할인 안내 가능"인 사람에게만: 실물 소책자 상품·할인 안내 (광고성 정보, 선택 동의)
+data.forEach((r, i) => {
   console.log(
-    `${String(i + 1).padStart(3)}. ${r.name}  ${phone(r.phone)}  [${r.followup_consented_at ? "후기·구매 연락 가능" : "배송 연락만"}]  (${SOURCE[r.source]}, ${when(r.created_at)})`,
-  ),
-);
+    `${String(i + 1).padStart(3)}. ${r.name}  ${phone(r.phone)}  [${r.marketing_consented_at ? "할인 안내 가능" : "PDF·후기 연락만"}]  (${SOURCE[r.source]}, ${when(r.created_at)})`,
+  );
+  // PDF를 만들 롤링페이퍼 (직접 방문했거나 방이 삭제됐으면 없음)
+  console.log(`     롤링페이퍼: ${r.rooms ? `${SITE}/v/${r.rooms.result_id}` : "연결된 방 없음 (연락할 때 확인)"}`);
+});

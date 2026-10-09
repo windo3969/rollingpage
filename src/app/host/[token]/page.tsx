@@ -177,7 +177,7 @@ export default async function HostPage(props: PageProps<"/host/[token]">) {
           <TemplatePicker token={token} current={isTemplateId(room.template) ? room.template : "paper"} />
 
           <div className="mt-6 border-t border-line pt-5">
-            <PdfInterestButton source="host" recordKey={token} />
+            <PdfInterestButton source="host" recordKey={token} resultId={room.result_id} />
           </div>
         </section>
 

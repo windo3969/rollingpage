@@ -28,7 +28,7 @@ const [roomsAll, messagesAll, participantsAll, eventsAll, requests, feedback] = 
   all("messages", "room_id, participant_id, photo_path"),
   all("participants", "id, room_id"),
   all("events", "name, source, room_id, created_at"),
-  all("photobook_requests", "source, followup_consented_at"), // 개인정보(이름·번호)는 읽지 않는다
+  all("photobook_requests", "source, marketing_consented_at"), // 개인정보(이름·번호)는 읽지 않는다
   all("feedback", "page, rating, message"),
 ]);
 const FREE_QUOTA = 200; // src/lib/photobook.ts 의 PHOTOBOOK_EVENT.freeQuota 와 맞출 것
@@ -118,14 +118,14 @@ line("클릭이 있는 방", `${interestRooms.size}개 / ${rooms.length}개 (${p
 // 구매 전환: 미리보기를 연 사람 중 실물 포토북을 신청한 비율 (신청은 방과 연결하지 않으므로 데모 구분 없음)
 const reqBy = (s) => requests.filter((r) => r.source === s).length;
 const viewsBy = (s) => interest.filter((e) => e.source === s).length;
-console.log("\n실물 포토북 신청 (선착순 무료 제작)");
+console.log("\n포토북 PDF 신청 (선착순 무료)");
 line("신청", `${requests.length}명 / 정원 ${FREE_QUOTA}명 (남은 자리 ${Math.max(0, FREE_QUOTA - requests.length)}명)`);
 line("전환율 (신청÷미리보기)", `${pct(requests.length, interest.length)}`);
 line("  결과 페이지에서", `${reqBy("result")}명 / 미리보기 ${viewsBy("result")}회 (${pct(reqBy("result"), viewsBy("result"))})`);
 line("  주최자 페이지에서", `${reqBy("host")}명 / 미리보기 ${viewsBy("host")}회 (${pct(reqBy("host"), viewsBy("host"))})`);
 line("  직접 방문", `${reqBy("direct")}명`);
-const followups = requests.filter((r) => r.followup_consented_at).length;
-line("후기·구매 연락 동의", `${followups}명 (${pct(followups, requests.length)})`);
+const marketing = requests.filter((r) => r.marketing_consented_at).length;
+line("실물 할인 소식 동의", `${marketing}명 (${pct(marketing, requests.length)})`);
 
 // 익명 피드백 (내용은 npm run feedback 으로 본다)
 const fbRating = (r) => feedback.filter((f) => f.rating === r).length;
