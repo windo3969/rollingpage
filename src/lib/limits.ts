@@ -1,6 +1,6 @@
 // 메시지 작성 제한. 클라이언트(입력창)와 서버(검증)가 같은 값을 쓴다.
 // DB 제약은 content 2000자로 더 넉넉하다 — 결과 페이지 레이아웃에 맞춰 여기서 조정한다.
-export const MESSAGE_MAX_LENGTH = 500;
+export const MESSAGE_MAX_LENGTH = 700;
 export const AUTHOR_MAX_LENGTH = 30;
 
 // 참여자 명단 (Phase 2). 이름 길이는 DB 제약(1~30자)과 같다.
